@@ -22,7 +22,6 @@ async def main():
 
     pygame.init()
     game_state_manager = GameStateManager()
-    dialogue = Dialogue()
     clock = pygame.time.Clock()
 
     SCREEN_WIDTH = 1024
@@ -35,14 +34,27 @@ async def main():
     comets = []
 
     comms = Comms(screen)
-    comms.add_portrait('images/comms woman.png', 'images/comms woman 2.png',
-                       (335, 150), alpha=0)
+
+    def comms_routine():
+        if not comms.is_fully_visible('spacewoman01'):
+            comms.toggle_visibility()
+        else:
+            spacewoman01.dialogue_index += 1
+        if spacewoman01.dialogue_index == len(spacewoman01.dialogue):
+            comms.toggle_visibility()
+            cockpit.instruments[11]['glow'] = False
+
+    comms.add_portrait('spacewoman01',
+                       'images/comms woman.png',
+                       'images/comms woman 2.png',
+                       (335, 150),
+                       alpha=0)
     comms_button = TransparentButton(None,
                                      20,
                                      20,
                                      (830, 830),
                                      0,
-                                     comms.toggle_visibility,
+                                     comms_routine,
                                      None,
                                      (255, 255, 255, 0),
                                      (255, 255, 255, 0),
@@ -56,8 +68,8 @@ async def main():
 
     spacewoman01 = SpaceWoman01(dialogue=SpaceWoman01.dialogue,
                                 position=(207,209),
-                                comms_button=None,
-                                game_state_manager=game_state_manager)
+                                game_state_manager=game_state_manager,
+                                comms_instance=comms)
 
     mouse_event_handler = MouseEventHandler(
         clickable_objects=[comms_button],
@@ -103,7 +115,7 @@ async def main():
         comms_button.draw(screen)
         comms.update_portraits()  # updates fade effect
         comms.draw()
-        if spacewoman01.is_visible:
+        if comms.is_fully_visible('spacewoman01'):
             spacewoman01.show_current_dialogue(screen, comms)
 
         pygame.display.update()

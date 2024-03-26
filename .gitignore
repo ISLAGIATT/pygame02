@@ -77,3 +77,13 @@ fabric.properties
 # Android studio 3.1+ serialized cache file
 .idea/caches/build_file_checksums.ser
 
+.idea/workspace.xml
+__pycache__/button.cpython-39.pyc
+__pycache__/cockpit.cpython-39.pyc
+__pycache__/dialogue.cpython-39.pyc
+__pycache__/dropdown.cpython-39.pyc
+__pycache__/exits_window.cpython-39.pyc
+__pycache__/game_objects.cpython-39.pyc
+__pycache__/game_state_manager.cpython-39.pyc
+__pycache__/mouse_event.cpython-39.pyc
+__pycache__/stars.cpython-39.pyc

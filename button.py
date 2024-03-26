@@ -37,8 +37,6 @@ class Button:
 
 class TransparentButton:
     def __init__(self, text, width, height, pos, elevation, action, image, color, shadow, hover):
-        # self.image = pygame.transform.scale(image, (int(width), int(height)))
-        # self.rect = self.image.get_rect()
         self.action = action
         self.width = width
         self.height = height

@@ -40,9 +40,9 @@ class Cockpit:
             # Large round yellow dial far left, bottom
             {'position': (259, 686), 'color': (251, 219, 66), 'size': (15, 15), 'shape': 'circle', 'glow': True,
              'fade_direction': 1, 'current_alpha': 128, 'max_brightness': 150, 'fade_speed': 4},
-            # Comm button
-            {'position': (839, 840), 'color': (251, 0, 0), 'size': (10, 10), 'shape': 'circle', 'glow': True,
-             'fade_direction': 1, 'current_alpha': 128, 'max_brightness': 150, 'fade_speed': 4},
+            # Comms button
+            {'position': (839, 840), 'color': (251, 125, 70), 'size': (10, 10), 'shape': 'circle', 'glow': True,
+             'fade_direction': 1, 'current_alpha': 128, 'max_brightness': 150, 'fade_speed': 8},
 
         ]
 
@@ -81,10 +81,11 @@ class Comms:
         self.portraits = []
         self.is_visible = False
 
-    def add_portrait(self, normal_image_path, static_image_path, position, alpha, static_duration=1, normal_duration=3, fade_speed=2):
+    def add_portrait(self, ident, normal_image_path, static_image_path, position, alpha, static_duration=1, normal_duration=2, fade_speed=2):
         normal_image = pygame.image.load(normal_image_path).convert_alpha()
         static_image = pygame.image.load(static_image_path).convert_alpha()
         self.portraits.append({
+            'id': ident,
             'normal_image': normal_image,
             'static_image': static_image,
             'position': position,
@@ -124,8 +125,8 @@ class Comms:
                     (not portrait['use_static'] and elapsed_time >= portrait['normal_duration']):
                 portrait['use_static'] = not portrait['use_static']
                 portrait['last_toggle_time'] = current_time  # Update only for the toggled portrait
-                portrait['normal_duration'] = random.randrange(10, 20)  # Optional reset
-                portrait['static_duration'] = random.randrange(1, 2)  # Optional reset
+                portrait['normal_duration'] = random.randrange(1, 5)  # Optional reset **was 10/20
+                portrait['static_duration'] = .1
 
     def toggle_visibility(self):
         current_time = time.time()
@@ -147,7 +148,6 @@ class Comms:
             temp_surface.set_alpha(portrait['current_alpha'])
             self.screen.blit(temp_surface, portrait['position'])
 
-    @property
-    def is_fully_visible(self):
+    def is_fully_visible(self, portrait_id):
         for portrait in self.portraits:
             return all(portrait['current_alpha'] == 85 for portrait in self.portraits)
