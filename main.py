@@ -9,10 +9,15 @@ from dialogue import Dialogue
 from game_objects import SpaceWoman01
 from game_state_manager import GameStateManager
 from mouse_event import MouseEventHandler
-from stars import Star, Comet
+from ship import Ship
+from stars import Star, Comet, Planetoid
 
 
 async def main():
+    # For displaying the velocity, initialize a Pygame font
+    pygame.font.init()  # Initialize font module
+    font = pygame.font.SysFont('Arial', 24)
+
     # Define colors
     WHITE = (255, 255, 255)
     BLACK = (0, 0, 0)
@@ -28,10 +33,12 @@ async def main():
     SCREEN_HEIGHT = 1024
     screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 
+    ship = Ship(position=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2), speed=.5, turn_speed=800)
     cockpit = Cockpit('images/starfighter01.png', screen)
-    NUM_STARS = 200
+    NUM_STARS = 300
     stars = [Star(SCREEN_WIDTH, SCREEN_HEIGHT) for _ in range(NUM_STARS)]
     comets = []
+    planetoid_01 = Planetoid('images/green_planet01.png', (600, 300), initial_scale=0.15)
 
     comms = Comms(screen)
 
@@ -76,14 +83,44 @@ async def main():
         interactive_objects=[spacewoman01],
         dropdown_menus=None)
 
+    position = pygame.Vector2(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2)  # Example starting position
+    direction = pygame.Vector2(0, 0)
+    speed = 300  # Pixels per second
+    ship_yaw = 0
+    ship_pitch = 0
     run = True
 
     while run:
+        # Movement
+        dt = clock.tick(60) / 1000.0  # Converts milliseconds to seconds
+        keys = pygame.key.get_pressed()
+
+        # For relative movement against starfield
+        ship_yaw_change = ship.turn_speed * dt if keys[pygame.K_d] else -ship.turn_speed * dt if keys[pygame.K_a] else 0
+        ship_pitch_change = ship.turn_speed * dt if keys[pygame.K_s] else -ship.turn_speed * dt if keys[
+            pygame.K_w] else 0
+
+        # Update ship's orientation
+        ship.angle += ship_yaw_change  # Assuming ship.angle incorporates both yaw and pitch
+
+        if keys[pygame.K_w]:
+            ship.move_forward(dt)
+        if keys[pygame.K_s]:
+            ship.move_forward(
+                -dt)  # Optionally, create a method for moving backward or adjust move_forward to handle negative dt
+        if keys[pygame.K_a]:
+            ship.turn(-ship.turn_speed * dt)
+        if keys[pygame.K_d]:
+            ship.turn(ship.turn_speed * dt)
+        if keys[pygame.K_UP]:  # Speed up
+            ship.adjust_speed(10 * dt)
+        if keys[pygame.K_DOWN]:  # Slow down
+            ship.adjust_speed(-10 * dt)
+
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.mixer.music.stop()
                 run = False
-
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 mouse_pos = event.pos
                 button = event.button
@@ -92,23 +129,23 @@ async def main():
 
         # Fill the screen with black to clear old frames
         screen.fill(BLACK)
+        ship_velocity_vector = ship.get_velocity_vector()
+        # ship_forward_speed = ship_velocity_vector.length()  # This gives you the magnitude of the velocity vector
+        for star in stars:
+            star.update(ship_velocity_vector, dt)
+            star.draw(screen)
 
         # An occasional comet
         if random.randrange(0, 1000) == 0:  # Adjust chances as needed
             comets.append(Comet(SCREEN_WIDTH, SCREEN_HEIGHT))
         comets = [comet for comet in comets if comet.x > -100]  # Adjust threshold as needed
-        # Update and draw comets
+        # # Update and draw comets
         for comet in comets:
-            comet.update()
+            comet.update(ship_yaw_change, ship_pitch_change, dt)
             comet.draw(screen)
 
-        # Update star positions
-        for star in stars:
-            star.update()
-
-        # Draw each star
-        for star in stars:
-            star.draw(screen)
+        planetoid_01.update(dt, ship_yaw_change, ship_pitch_change, ship.speed)
+        planetoid_01.draw(screen)
 
         # Overlay the cockpit image after drawing the stars
         cockpit.draw()
@@ -118,12 +155,15 @@ async def main():
         if comms.is_fully_visible('spacewoman01'):
             spacewoman01.show_current_dialogue(screen, comms)
 
-        pygame.display.update()
+        velocity_text = f"Velocity: {ship.speed:.2f}"
+        velocity_surface = font.render(velocity_text, True, pygame.Color('white'))
+        screen.blit(velocity_surface, (20, 20))  # Position the text on the top-left corner
+        angle_text = f"Angle: {ship.angle}"
+        angle_surface = font.render(angle_text, True, pygame.Color('white'))
+        screen.blit(angle_surface, (20, 40))  # Position the text on the top-left corner
+
+        pygame.display.flip()
 
         await asyncio.sleep(0)  # Control the frame update rate for asyncio compatibility
-
-        # Control the frame rate for smooth animations
-        clock.tick(60)  # Limit to 60 frames per second
-
 
 asyncio.run(main())
