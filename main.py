@@ -1,5 +1,6 @@
 import asyncio
 import pygame
+import pygame.sprite
 import random
 import time
 
@@ -38,7 +39,10 @@ async def main():
     NUM_STARS = 300
     stars = [Star(SCREEN_WIDTH, SCREEN_HEIGHT) for _ in range(NUM_STARS)]
     comets = []
+
+    planetoids = pygame.sprite.Group()
     planetoid_01 = Planetoid('images/green_planet01.png', (600, 300), initial_scale=0.15)
+    planetoids.add(planetoid_01)  # This line is correct
 
     comms = Comms(screen)
 
@@ -88,6 +92,8 @@ async def main():
     speed = 300  # Pixels per second
     ship_yaw = 0
     ship_pitch = 0
+    planetoid_01_orbit_speed = .5
+    planetoid_01_padding = 30
     run = True
 
     while run:
@@ -102,16 +108,57 @@ async def main():
 
         # Update ship's orientation
         ship.angle += ship_yaw_change  # Assuming ship.angle incorporates both yaw and pitch
+        # print(planetoid_01.position.x)
 
         if keys[pygame.K_w]:
-            ship.move_forward(dt)
+            ship.pitch_down(dt)
+            if not planetoid_01.behind_player:
+                planetoid_01.position.y -= planetoid_01_orbit_speed
+                if planetoid_01.position.y <= 0 - planetoid_01_padding:
+                    planetoid_01.behind_player = True
+                    planetoid_01.is_visible = False
+            else:
+                planetoid_01.position.y += planetoid_01_orbit_speed
+                if planetoid_01.position.y >= SCREEN_HEIGHT + planetoid_01_padding:
+                    planetoid_01.behind_player = False
+                    planetoid_01.is_visible = True
         if keys[pygame.K_s]:
-            ship.move_forward(
-                -dt)  # Optionally, create a method for moving backward or adjust move_forward to handle negative dt
+            ship.pitch_down(-dt)
+            if not planetoid_01.behind_player:
+                planetoid_01.position.y += planetoid_01_orbit_speed
+                if planetoid_01.position.y >= SCREEN_HEIGHT + planetoid_01_padding:
+                    planetoid_01.behind_player = True
+                    planetoid_01.is_visible = False
+            else:
+                planetoid_01.position.y -= planetoid_01_orbit_speed
+                if planetoid_01.position.y <= 0 - planetoid_01_padding:
+                    planetoid_01.behind_player = False
+                    planetoid_01.is_visible = True
         if keys[pygame.K_a]:
             ship.turn(-ship.turn_speed * dt)
+            if not planetoid_01.behind_player:
+                planetoid_01.position.x += planetoid_01_orbit_speed
+                if planetoid_01.position.x >= SCREEN_WIDTH + planetoid_01_padding:
+                    planetoid_01.behind_player = True
+                    planetoid_01.is_visible = False
+            else:
+                planetoid_01.position.x -= planetoid_01_orbit_speed
+                if planetoid_01.position.x <= 0 - planetoid_01_padding:
+                    planetoid_01.behind_player = False
+                    planetoid_01.is_visible = True
         if keys[pygame.K_d]:
             ship.turn(ship.turn_speed * dt)
+            if not planetoid_01.behind_player:
+                planetoid_01.position.x -= planetoid_01_orbit_speed
+                if planetoid_01.position.x <= (0 - planetoid_01_padding):
+                    planetoid_01.behind_player = True
+                    planetoid_01.is_visible = False
+            else:
+                planetoid_01.position.x += planetoid_01_orbit_speed
+                if planetoid_01.position.x >= SCREEN_WIDTH + planetoid_01_padding:
+                    planetoid_01.behind_player = False
+                    planetoid_01.is_visible = True
+
         if keys[pygame.K_UP]:  # Speed up
             ship.adjust_speed(10 * dt)
         if keys[pygame.K_DOWN]:  # Slow down
@@ -144,8 +191,9 @@ async def main():
             comet.update(ship_yaw_change, ship_pitch_change, dt)
             comet.draw(screen)
 
-        planetoid_01.update(dt, ship_yaw_change, ship_pitch_change, ship.speed)
-        planetoid_01.draw(screen)
+        if planetoid_01.is_visible:
+            planetoids.draw(screen)
+        planetoids.update(dt, ship_yaw_change, ship_pitch_change, ship.speed)
 
         # Overlay the cockpit image after drawing the stars
         cockpit.draw()

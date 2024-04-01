@@ -15,7 +15,7 @@ class Ship:
         self.angle += angle_change
         self.angle %= 360  # Keep the angle within 0-360 degrees
 
-    def move_forward(self, dt):
+    def pitch_down(self, dt):
         """Moves the ship forward based on its current direction."""
         rad_angle = math.radians(self.angle)
         self.position += pygame.Vector2(math.cos(rad_angle), math.sin(rad_angle)) * self.speed * dt

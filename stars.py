@@ -1,4 +1,5 @@
 import pygame
+import pygame.sprite
 import random
 import math
 
@@ -57,12 +58,15 @@ class Comet:
         pygame.draw.circle(screen, self.WHITE, (int(self.x), int(self.y)), self.size)
         pygame.draw.line(screen, self.WHITE, (int(self.x), int(self.y)), (int(self.x) + tail_length, int(self.y)), tail_width)
 
-class Planetoid:
+class Planetoid(pygame.sprite.Sprite):
     def __init__(self, image_path, position, initial_scale=1.0):
+        super().__init__()
         self.original_image = pygame.image.load(image_path).convert_alpha()
         self.position = pygame.Vector2(position)
         self.scale_factor = initial_scale
         self.update_image()
+        self.behind_player = False
+        self.is_visible = True
 
     def update_image(self):
         # Apply the new scale to the planetoid image
@@ -84,8 +88,19 @@ class Planetoid:
         self.update_image()
 
         # Adjust position based on ship's yaw and pitch changes
-        self.position.x += ship_yaw_change * dt * -10  # Adjust direction based on yaw
-        self.position.y += ship_pitch_change * dt * 10  # Adjust direction based on pitch
+        # self.position.x += ship_yaw_change * dt * -10  # Adjust direction based on yaw
+        # self.position.y += ship_pitch_change * dt * 10  # Adjust direction based on pitch
 
-    def draw(self, screen):
-        screen.blit(self.image, self.rect.topleft)
+    def set_alpha(self, alpha):
+        # Assuming self.original_image is your base image with per-pixel alpha
+        # Create a copy to preserve the original
+        temp_image = self.original_image.copy()
+
+        # Fill the copy with white color and the desired alpha
+        # This effectively sets the overall transparency level
+        temp_image.fill((255, 255, 255, alpha), special_flags=pygame.BLEND_RGBA_MULT)
+
+        # Now, apply any transformations like scaling
+        self.image = pygame.transform.scale(temp_image, (int(temp_image.get_width() * self.scale_factor),
+                                                         int(temp_image.get_height() * self.scale_factor)))
+        self.rect = self.image.get_rect(center=self.position)
