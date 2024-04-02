@@ -2,11 +2,9 @@ import asyncio
 import pygame
 import pygame.sprite
 import random
-import time
 
 from button import Button, TransparentButton
 from cockpit import Cockpit, Comms
-from dialogue import Dialogue
 from game_objects import SpaceWoman01
 from game_state_manager import GameStateManager
 from mouse_event import MouseEventHandler
@@ -87,12 +85,7 @@ async def main():
         interactive_objects=[spacewoman01],
         dropdown_menus=None)
 
-    position = pygame.Vector2(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2)  # Example starting position
-    direction = pygame.Vector2(0, 0)
-    speed = 300  # Pixels per second
-    ship_yaw = 0
-    ship_pitch = 0
-    planetoid_01_orbit_speed = .5
+    planetoid_01_orbit_speed = .15
     planetoid_01_padding = 30
     run = True
 
@@ -108,7 +101,6 @@ async def main():
 
         # Update ship's orientation
         ship.angle += ship_yaw_change  # Assuming ship.angle incorporates both yaw and pitch
-        # print(planetoid_01.position.x)
 
         if keys[pygame.K_w]:
             ship.pitch_down(dt)
@@ -177,7 +169,7 @@ async def main():
         # Fill the screen with black to clear old frames
         screen.fill(BLACK)
         ship_velocity_vector = ship.get_velocity_vector()
-        # ship_forward_speed = ship_velocity_vector.length()  # This gives you the magnitude of the velocity vector
+
         for star in stars:
             star.update(ship_velocity_vector, dt)
             star.draw(screen)
@@ -200,9 +192,12 @@ async def main():
         comms_button.draw(screen)
         comms.update_portraits()  # updates fade effect
         comms.draw()
+
+        # Comms dialogue draw
         if comms.is_fully_visible('spacewoman01'):
             spacewoman01.show_current_dialogue(screen, comms)
 
+        # Debug
         velocity_text = f"Velocity: {ship.speed:.2f}"
         velocity_surface = font.render(velocity_text, True, pygame.Color('white'))
         screen.blit(velocity_surface, (20, 20))  # Position the text on the top-left corner

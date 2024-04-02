@@ -76,31 +76,12 @@ class Planetoid(pygame.sprite.Sprite):
         self.rect = self.image.get_rect(center=self.position)
 
     def update(self, dt, ship_yaw_change, ship_pitch_change, ship_speed):
-        # Scale the planetoid based on the ship's forward speed
-        # velocity_magnitude = ship_velocity_vector.length()
-        # Adjust scale factor based on speed; more speed = larger scale change
-        # The 0.0005 multiplier is an arbitrary scale factor for how quickly the planetoid scales based on speed
-        self.scale_factor += ship_speed * dt * 0.0005
+        if not self.behind_player:
+            self.scale_factor += ship_speed * dt * 0.0005
+        else:
+            self.scale_factor -= ship_speed * dt * 0.0005
 
         # Clamp the scale factor to prevent it from going below or above desired thresholds
         self.scale_factor = max(0.1, min(self.scale_factor, 5.0))
 
         self.update_image()
-
-        # Adjust position based on ship's yaw and pitch changes
-        # self.position.x += ship_yaw_change * dt * -10  # Adjust direction based on yaw
-        # self.position.y += ship_pitch_change * dt * 10  # Adjust direction based on pitch
-
-    def set_alpha(self, alpha):
-        # Assuming self.original_image is your base image with per-pixel alpha
-        # Create a copy to preserve the original
-        temp_image = self.original_image.copy()
-
-        # Fill the copy with white color and the desired alpha
-        # This effectively sets the overall transparency level
-        temp_image.fill((255, 255, 255, alpha), special_flags=pygame.BLEND_RGBA_MULT)
-
-        # Now, apply any transformations like scaling
-        self.image = pygame.transform.scale(temp_image, (int(temp_image.get_width() * self.scale_factor),
-                                                         int(temp_image.get_height() * self.scale_factor)))
-        self.rect = self.image.get_rect(center=self.position)
