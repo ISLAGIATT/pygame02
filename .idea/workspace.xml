@@ -4,7 +4,11 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="05f7812f-ee3c-44ef-964e-18c07ae7c61f" name="Changes" comment="planetoid 01 moving in relation to steering&#10;made planetoid sprite group">
+    <list default="true" id="05f7812f-ee3c-44ef-964e-18c07ae7c61f" name="Changes" comment="scaling in relation to direction front/back">
+      <change afterPath="$PROJECT_DIR$/images/space_station01.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/images/star01.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/images/star02.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/images/star03.png" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/stars.py" beforeDir="false" afterPath="$PROJECT_DIR$/stars.py" afterDir="false" />
@@ -33,23 +37,23 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;ASKED_MARK_IGNORED_FILES_AS_EXCLUDED&quot;: &quot;true&quot;,
-    &quot;Python.main.executor&quot;: &quot;Run&quot;,
-    &quot;Python.test.executor&quot;: &quot;Run&quot;,
-    &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;master&quot;,
-    &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;,
-    &quot;last_opened_file_path&quot;: &quot;C:/Users/mattr/PycharmProjects/pythonProject/portfolio09_pygame02/pygame02/images&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;preferences.pluginManager&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "ASKED_MARK_IGNORED_FILES_AS_EXCLUDED": "true",
+    "Python.main.executor": "Run",
+    "Python.test.executor": "Run",
+    "RunOnceActivity.OpenProjectViewOnStart": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "git-widget-placeholder": "master",
+    "ignore.virus.scanning.warn.message": "true",
+    "last_opened_file_path": "C:/Users/mattr/PycharmProjects/pythonProject/portfolio09_pygame02/pygame02",
+    "settings.editor.selected.configurable": "preferences.pluginManager"
   }
-}</component>
+}]]></component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
-      <recent name="C:\Users\mattr\PycharmProjects\pythonProject\portfolio09_pygame02\pygame02\images" />
       <recent name="C:\Users\mattr\PycharmProjects\pythonProject\portfolio09_pygame02\pygame02" />
+      <recent name="C:\Users\mattr\PycharmProjects\pythonProject\portfolio09_pygame02\pygame02\images" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
       <recent name="C:\Users\mattr\PycharmProjects\pythonProject\portfolio09_pygame02\pygame02\images" />
@@ -127,7 +131,15 @@
       <option name="project" value="LOCAL" />
       <updated>1711993669940</updated>
     </task>
-    <option name="localTasksCounter" value="5" />
+    <task id="LOCAL-00005" summary="scaling in relation to direction front/back">
+      <option name="closed" value="true" />
+      <created>1712099809802</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1712099809802</updated>
+    </task>
+    <option name="localTasksCounter" value="6" />
     <servers />
   </component>
   <component name="VcsManagerConfiguration">
@@ -135,6 +147,7 @@
     <MESSAGE value="comms routine 1 works" />
     <MESSAGE value="basic steering&#10;planet scaling" />
     <MESSAGE value="planetoid 01 moving in relation to steering&#10;made planetoid sprite group" />
-    <option name="LAST_COMMIT_MESSAGE" value="planetoid 01 moving in relation to steering&#10;made planetoid sprite group" />
+    <MESSAGE value="scaling in relation to direction front/back" />
+    <option name="LAST_COMMIT_MESSAGE" value="scaling in relation to direction front/back" />
   </component>
 </project>

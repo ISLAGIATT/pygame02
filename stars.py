@@ -13,7 +13,7 @@ class Star:
         # Stars are initially placed with random x, y values and a z value that simulates depth
         self.x = random.uniform(-1, 1)
         self.y = random.uniform(-1, 1)
-        self.z = random.uniform(0.01, 1.0)  # z represents depth, and should never be 0
+        self.z = random.uniform(0.02, 1.0)  # z represents depth, and should never be 0
 
     def update(self, ship_velocity_vector, dt):
         # Simulate star moving towards the player by decreasing z
@@ -59,11 +59,12 @@ class Comet:
         pygame.draw.line(screen, self.WHITE, (int(self.x), int(self.y)), (int(self.x) + tail_length, int(self.y)), tail_width)
 
 class Planetoid(pygame.sprite.Sprite):
-    def __init__(self, image_path, position, initial_scale=1.0):
+    def __init__(self, image_path, position, initial_scale=1.0, scaling_rate=0.0005):
         super().__init__()
         self.original_image = pygame.image.load(image_path).convert_alpha()
         self.position = pygame.Vector2(position)
         self.scale_factor = initial_scale
+        self.scaling_rate = scaling_rate
         self.update_image()
         self.behind_player = False
         self.is_visible = True
@@ -77,9 +78,9 @@ class Planetoid(pygame.sprite.Sprite):
 
     def update(self, dt, ship_yaw_change, ship_pitch_change, ship_speed):
         if not self.behind_player:
-            self.scale_factor += ship_speed * dt * 0.0005
+            self.scale_factor += ship_speed * dt * self.scaling_rate  # Use scaling rate here
         else:
-            self.scale_factor -= ship_speed * dt * 0.0005
+            self.scale_factor -= ship_speed * dt * self.scaling_rate
 
         # Clamp the scale factor to prevent it from going below or above desired thresholds
         self.scale_factor = max(0.1, min(self.scale_factor, 5.0))
