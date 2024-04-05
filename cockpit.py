@@ -151,3 +151,85 @@ class Comms:
     def is_fully_visible(self, portrait_id):
         for portrait in self.portraits:
             return all(portrait['current_alpha'] == 85 for portrait in self.portraits)
+
+class Speedometer:
+    def __init__(self, position, font_size=18, font_color=(255, 255, 255), box_color=(0, 0, 0), box_padding=10,
+                 threshold=0.01, border_radius=10):
+        pygame.font.init()
+        self.font = pygame.font.SysFont('lucidasanstypewriter', font_size)
+        self.font_color = font_color
+        self.box_color = box_color
+        self.position = position  # This position now represents the top-left corner of the black box
+        self.box_padding = box_padding
+        self.threshold = threshold
+        self.border_radius = border_radius  # New attribute for rounded corners
+        self.last_speed = None
+        self.current_speed_surface = None
+        # Initially, we don't know the size of the box, so set it to 0
+        self.box_width = 0
+        self.box_height = 0
+
+    def update(self, speed):
+        if self.last_speed is None or abs(speed - self.last_speed) > self.threshold:
+            speed_text = f"VELOCITY: {speed:.2f}"
+            self.current_speed_surface = self.font.render(speed_text, True, self.font_color)
+            self.last_speed = speed
+            # Update the box size based on the new text dimensions plus padding
+            self.box_width = 160
+            self.box_height = 50
+
+    def draw(self, surface):
+        if self.current_speed_surface:
+            # Calculate the center position for the text within the box
+            text_x = self.position[0] + (self.box_width - self.current_speed_surface.get_width()) // 2
+            text_y = self.position[1] + (self.box_height - self.current_speed_surface.get_height()) // 2
+
+            # Draw the black box with rounded corners
+            box_rect = pygame.Rect(self.position[0], self.position[1], self.box_width, self.box_height)
+            pygame.draw.rect(surface, self.box_color, box_rect, border_radius=self.border_radius)
+
+            # Then draw the speed text over it
+            surface.blit(self.current_speed_surface, (text_x, text_y))
+
+class Radar:
+    def __init__(self, center_position, radius, radar_color=(0, 255, 0), background_color=(20, 20, 20), border_color=(255, 255, 255), border_thickness=2, blink_duration=0.5):
+        pygame.font.init()
+        self.center_position = center_position
+        self.radius = radius
+        self.radar_color = radar_color
+        self.background_color = background_color
+        self.border_color = border_color
+        self.border_thickness = border_thickness
+        self.blink_duration = blink_duration
+        self.last_blink_time = time.time()
+        self.blink_state = True
+
+    def draw(self, surface, planetoids, ship_position):
+        current_time = time.time()
+        if current_time - self.last_blink_time > self.blink_duration:
+            self.blink_state = not self.blink_state
+            self.last_blink_time = current_time
+
+        pygame.draw.circle(surface, self.background_color, self.center_position, self.radius)
+        pygame.draw.circle(surface, self.border_color, self.center_position, self.radius, self.border_thickness)
+
+        for planetoid in planetoids:
+            self._draw_planetoid_on_radar(surface, planetoid, ship_position)
+
+    def _draw_planetoid_on_radar(self, surface, planetoid, ship_position):
+        # Calculate the relative position of the planetoid to the ship
+        rel_x = planetoid.position.x - ship_position.x
+        rel_y = planetoid.position.y - ship_position.y
+
+        # Scale these positions to fit on the radar
+        scale_factor = self.radius / (pygame.display.get_surface().get_width() / 2)
+        radar_x = int(self.center_position[0] + rel_x * scale_factor)
+        radar_y = int(self.center_position[1] + rel_y * scale_factor)
+
+        # Draw the planetoid on the radar
+        if abs(rel_x) <= self.radius / scale_factor and abs(rel_y) <= self.radius / scale_factor:
+            if planetoid.behind_player:
+                if self.blink_state:
+                    pygame.draw.circle(surface, self.radar_color, (radar_x, radar_y), 2)
+            else:
+                pygame.draw.circle(surface, self.radar_color, (radar_x, radar_y), 2)

@@ -4,7 +4,7 @@ import pygame.sprite
 import random
 
 from button import Button, TransparentButton
-from cockpit import Cockpit, Comms
+from cockpit import Cockpit, Comms, Speedometer, Radar
 from game_objects import SpaceWoman01
 from game_state_manager import GameStateManager
 from mouse_event import MouseEventHandler
@@ -36,6 +36,10 @@ async def main():
 
     ship = Ship(position=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2), speed=.5, turn_speed=800)
     cockpit = Cockpit('images/starfighter01.png', screen)
+    speedometer = Speedometer((738, 724))
+    radar_position = (513, 622)
+    radar = Radar(radar_position, 80)
+
     NUM_STARS = 300
     stars = [Star(SCREEN_WIDTH, SCREEN_HEIGHT) for _ in range(NUM_STARS)]
     comets = []
@@ -54,7 +58,7 @@ async def main():
     star_01 = Planetoid('images/star01.png', (400,400),
                         # ((SCREEN_WIDTH // 2), (SCREEN_HEIGHT // 2)),
                         initial_scale=.2,
-                        scaling_rate=0)
+                        scaling_rate=0) # static background
     planetoids.add(planetoid_01, space_station_01, star_01)
 
 
@@ -103,7 +107,6 @@ async def main():
     planetoid_orbit_speed = 1
     # avoid fat planets disappearing before fully off-screen
     planetoid_padding = 30
-
     run = True
     while run:
         # Movement
@@ -210,22 +213,27 @@ async def main():
                 screen.blit(planetoid.image, planetoid.rect)
 
         # Overlay the cockpit image after drawing the stars
+        speedometer.update(ship.speed)
+        speedometer.draw(screen)
+        radar.draw(screen, planetoids, ship.position)
         cockpit.draw()
         comms_button.draw(screen)
         comms.update_portraits()  # updates fade effect
         comms.draw()
 
+
         # Comms dialogue draw
         if comms.is_fully_visible('spacewoman01'):
             spacewoman01.show_current_dialogue(screen, comms)
 
+
         # Debug
-        velocity_text = f"Velocity: {ship.speed:.2f}"
-        velocity_surface = font.render(velocity_text, True, pygame.Color('white'))
-        screen.blit(velocity_surface, (20, 20))  # Position the text on the top-left corner
-        angle_text = f"Angle: {ship.angle}"
-        angle_surface = font.render(angle_text, True, pygame.Color('white'))
-        screen.blit(angle_surface, (20, 40))  # Position the text on the top-left corner
+        # velocity_text = f"Velocity: {ship.speed:.2f}"
+        # velocity_surface = font.render(velocity_text, True, pygame.Color('white'))
+        # screen.blit(velocity_surface, (20, 20))  # Position the text on the top-left corner
+        # angle_text = f"Angle: {ship.angle}"
+        # angle_surface = font.render(angle_text, True, pygame.Color('white'))
+        # screen.blit(angle_surface, (20, 40))  # Position the text on the top-left corner
 
         pygame.display.flip()
 

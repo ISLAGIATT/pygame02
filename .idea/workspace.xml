@@ -4,14 +4,12 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="05f7812f-ee3c-44ef-964e-18c07ae7c61f" name="Changes" comment="scaling in relation to direction front/back">
-      <change afterPath="$PROJECT_DIR$/images/space_station01.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/images/star01.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/images/star02.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/images/star03.png" afterDir="false" />
+    <list default="true" id="05f7812f-ee3c-44ef-964e-18c07ae7c61f" name="Changes" comment="adding stars">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cockpit.py" beforeDir="false" afterPath="$PROJECT_DIR$/cockpit.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/images/starfighter01.png" beforeDir="false" afterPath="$PROJECT_DIR$/images/starfighter01.png" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/stars.py" beforeDir="false" afterPath="$PROJECT_DIR$/stars.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/test.py" beforeDir="false" afterPath="$PROJECT_DIR$/test.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -28,6 +26,18 @@
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
+  <component name="GitHubPullRequestSearchHistory"><![CDATA[{
+  "lastFilter": {
+    "state": "OPEN",
+    "assignee": "ISLAGIATT"
+  }
+}]]></component>
+  <component name="GithubPullRequestsUISettings"><![CDATA[{
+  "selectedUrlAndAccountId": {
+    "url": "https://github.com/ISLAGIATT/pygame02",
+    "accountId": "d63defbb-7a1e-459c-8e7e-990293b7f5d6"
+  }
+}]]></component>
   <component name="ProjectColorInfo">{
   &quot;associatedIndex&quot;: 8
 }</component>
@@ -46,14 +56,14 @@
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "git-widget-placeholder": "master",
     "ignore.virus.scanning.warn.message": "true",
-    "last_opened_file_path": "C:/Users/mattr/PycharmProjects/pythonProject/portfolio09_pygame02/pygame02",
+    "last_opened_file_path": "C:/Users/mattr/PycharmProjects/pythonProject/portfolio09_pygame02/pygame02/images",
     "settings.editor.selected.configurable": "preferences.pluginManager"
   }
 }]]></component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
-      <recent name="C:\Users\mattr\PycharmProjects\pythonProject\portfolio09_pygame02\pygame02" />
       <recent name="C:\Users\mattr\PycharmProjects\pythonProject\portfolio09_pygame02\pygame02\images" />
+      <recent name="C:\Users\mattr\PycharmProjects\pythonProject\portfolio09_pygame02\pygame02" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
       <recent name="C:\Users\mattr\PycharmProjects\pythonProject\portfolio09_pygame02\pygame02\images" />
@@ -86,7 +96,7 @@
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
-        <option value="bundled-python-sdk-09665e90c3a7-d3b881c8e49f-com.jetbrains.pycharm.community.sharedIndexes.bundled-PC-233.15026.15" />
+        <option value="bundled-python-sdk-0509580d9d50-746f403e7f0c-com.jetbrains.pycharm.community.sharedIndexes.bundled-PC-241.14494.241" />
       </set>
     </attachedChunks>
   </component>
@@ -139,7 +149,15 @@
       <option name="project" value="LOCAL" />
       <updated>1712099809802</updated>
     </task>
-    <option name="localTasksCounter" value="6" />
+    <task id="LOCAL-00006" summary="adding stars">
+      <option name="closed" value="true" />
+      <created>1712249234277</created>
+      <option name="number" value="00006" />
+      <option name="presentableId" value="LOCAL-00006" />
+      <option name="project" value="LOCAL" />
+      <updated>1712249234277</updated>
+    </task>
+    <option name="localTasksCounter" value="7" />
     <servers />
   </component>
   <component name="VcsManagerConfiguration">
@@ -148,6 +166,7 @@
     <MESSAGE value="basic steering&#10;planet scaling" />
     <MESSAGE value="planetoid 01 moving in relation to steering&#10;made planetoid sprite group" />
     <MESSAGE value="scaling in relation to direction front/back" />
-    <option name="LAST_COMMIT_MESSAGE" value="scaling in relation to direction front/back" />
+    <MESSAGE value="adding stars" />
+    <option name="LAST_COMMIT_MESSAGE" value="adding stars" />
   </component>
 </project>
