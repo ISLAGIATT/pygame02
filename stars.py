@@ -22,15 +22,16 @@ class Star:
             self.reset_star()
 
     def draw(self, screen):
-        # Convert 3D star position to 2D using perspective projection
+        # 3D scaling effect
         x_center, y_center = self.screen_width / 2, self.screen_height / 2
-        scale = 200  # Adjust scale to control how large the stars appear based on depth
+        scale = 200  # size of stars
         x_2d = (self.x / self.z) * scale + x_center
         y_2d = (self.y / self.z) * scale + y_center
 
-        # Draw the star as a circle, with size based on depth
+        # Draw stars (circles) here
         radius = max(1, 2 * (1 - self.z))
-        pygame.draw.circle(screen, (255, 255, 255), (int(x_2d), int(y_2d)), radius)
+        if abs(x_2d) < 10000 and abs(y_2d) < 10000:  # Arbitrary large value check
+            pygame.draw.circle(screen, (255, 255, 255), (int(x_2d), int(y_2d)), radius)
 
 class Comet:
     WHITE = (255, 255, 255)
@@ -59,12 +60,13 @@ class Comet:
         pygame.draw.line(screen, self.WHITE, (int(self.x), int(self.y)), (int(self.x) + tail_length, int(self.y)), tail_width)
 
 class Planetoid(pygame.sprite.Sprite):
-    def __init__(self, image_path, position, initial_scale=1.0, scaling_rate=0.0005):
+    def __init__(self, image_path, position, initial_scale=1.0, scaling_rate=0.0005, orbit_speed=5):
         super().__init__()
         self.original_image = pygame.image.load(image_path).convert_alpha()
         self.position = pygame.Vector2(position)
         self.scale_factor = initial_scale
         self.scaling_rate = scaling_rate
+        self.orbit_speed = orbit_speed
         self.update_image()
         self.behind_player = False
         self.is_visible = True

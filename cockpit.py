@@ -153,19 +153,18 @@ class Comms:
             return all(portrait['current_alpha'] == 85 for portrait in self.portraits)
 
 class Speedometer:
-    def __init__(self, position, font_size=18, font_color=(255, 255, 255), box_color=(0, 0, 0), box_padding=10,
+    def __init__(self, position, font_size=18, font_color=(255, 0, 0), box_color=(0, 0, 0), box_padding=10,
                  threshold=0.01, border_radius=10):
         pygame.font.init()
-        self.font = pygame.font.SysFont('lucidasanstypewriter', font_size)
+        self.font = pygame.font.Font('fonts/digital-7 (italic).ttf', 24)
         self.font_color = font_color
         self.box_color = box_color
-        self.position = position  # This position now represents the top-left corner of the black box
+        self.position = position
         self.box_padding = box_padding
         self.threshold = threshold
-        self.border_radius = border_radius  # New attribute for rounded corners
+        self.border_radius = border_radius
         self.last_speed = None
         self.current_speed_surface = None
-        # Initially, we don't know the size of the box, so set it to 0
         self.box_width = 0
         self.box_height = 0
 
@@ -227,9 +226,9 @@ class Radar:
         radar_y = int(self.center_position[1] + rel_y * scale_factor)
 
         # Draw the planetoid on the radar
-        if abs(rel_x) <= self.radius / scale_factor and abs(rel_y) <= self.radius / scale_factor:
-            if planetoid.behind_player:
-                if self.blink_state:
-                    pygame.draw.circle(surface, self.radar_color, (radar_x, radar_y), 2)
-            else:
+        if abs(radar_x - self.center_position[0]) <= self.radius and abs(
+                radar_y - self.center_position[1]) <= self.radius:
+            if planetoid.behind_player and self.blink_state:
+                pygame.draw.circle(surface, self.radar_color, (radar_x, radar_y), 2)
+            elif not planetoid.behind_player:
                 pygame.draw.circle(surface, self.radar_color, (radar_x, radar_y), 2)
