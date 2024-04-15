@@ -3,6 +3,7 @@ class GameStateManager:
         self.current_room_id = None
         self.current_open_dropdown = None
         self.target_alpha_reached = False
+        self.navpoint_001_active = False
 
         self.rooms = {
             'room1': {  # test room 1

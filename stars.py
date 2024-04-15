@@ -60,7 +60,7 @@ class Comet:
         pygame.draw.line(screen, self.WHITE, (int(self.x), int(self.y)), (int(self.x) + tail_length, int(self.y)), tail_width)
 
 class Planetoid(pygame.sprite.Sprite):
-    def __init__(self, image_path, position, initial_scale=1.0, scaling_rate=0.0005, orbit_speed=5):
+    def __init__(self, image_path, position, object_id, initial_scale=1.0, scaling_rate=0.0005, orbit_speed=5):
         super().__init__()
         self.original_image = pygame.image.load(image_path).convert_alpha()
         self.position = pygame.Vector2(position)
@@ -70,6 +70,7 @@ class Planetoid(pygame.sprite.Sprite):
         self.update_image()
         self.behind_player = False
         self.is_visible = True
+        self.object_id = object_id
 
     def update_image(self):
         # Apply the new scale to the planetoid image

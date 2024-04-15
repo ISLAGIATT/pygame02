@@ -13,8 +13,8 @@ from stars import Star, Comet, Planetoid
 
 
 async def main():
-    # For displaying the debug text, initialize a Pygame font
-    pygame.font.init()  # Initialize font module
+    # For displaying the debug text
+    pygame.font.init()
     font = pygame.font.SysFont('Arial', 24)
 
     # Define colors
@@ -43,29 +43,34 @@ async def main():
     NUM_STARS = 300
     stars = [Star(SCREEN_WIDTH, SCREEN_HEIGHT) for _ in range(NUM_STARS)]
     comets = []
-    planetoids = pygame.sprite.Group()
+    planetoids = pygame.sprite.LayeredUpdates()
 
     # intial scale = distance away
 
     planetoid_01 = Planetoid('images/green_planet01.png',
                              (600, 300),
+                             "planetoid_01",
                              initial_scale=0.15,
                              scaling_rate=.00005,
                              orbit_speed=1)
     space_station_01 = Planetoid('images/space_station01.png',
                                  (-400, 400,),
+                                 "space_station_01",
                                  initial_scale=.04,
                                  scaling_rate=.001,
                                  orbit_speed=2)
-    star_01 = Planetoid('images/star01.png', (400,400),
-                        # ((SCREEN_WIDTH // 2), (SCREEN_HEIGHT // 2)),
+    star_01 = Planetoid('images/star01.png',
+                        (400,400),
+                        "star_01",
                         initial_scale=.2,
                         scaling_rate=0,
                         orbit_speed=.25)
-    planetoids.add(planetoid_01, space_station_01, star_01)
+    # Add sprites with a specific layer
+    planetoids.add(star_01, layer=0)  # Ensure star_01 is on the bottom layer
+    planetoids.add(planetoid_01, layer=1)
+    planetoids.add(space_station_01, layer=2)
 
-
-    def comms_routine():
+    def spacewoman_comms_routine():
         if not comms.is_fully_visible('spacewoman01'):
             comms.toggle_visibility()
         else:
@@ -73,6 +78,14 @@ async def main():
         if spacewoman01.dialogue_index == len(spacewoman01.dialogue):
             comms.toggle_visibility()
             cockpit.instruments[11]['glow'] = False
+            # direct to space station now
+            game_state_manager.navpoint_001_active = True
+
+    def draw_cross(surface, position, size=10, color=(255, 0, 0), thickness=2):
+        x, y = position
+        pygame.draw.line(surface, color, (x - size, y), (x + size, y), thickness)
+        pygame.draw.line(surface, color, (x, y - size), (x, y + size), thickness)
+
 
     comms.add_portrait('spacewoman01',
                        'images/comms woman.png',
@@ -84,7 +97,7 @@ async def main():
                                      20,
                                      (830, 830),
                                      0,
-                                     comms_routine,
+                                     spacewoman_comms_routine,
                                      None,
                                      (255, 255, 255, 0),
                                      (255, 255, 255, 0),
@@ -108,73 +121,83 @@ async def main():
 
     # orbit speed = perspective turn speed
     planetoid_orbit_speed = 10
+
     # avoid fat planets disappearing before fully off-screen
     planetoid_padding = 30
+    # normal vs fast turn
+    yoke_pull = 1
+
     run = True
     while run:
         # Movement
         dt = clock.tick(60) / 1000.0  # Converts milliseconds to seconds
         keys = pygame.key.get_pressed()
 
+        # Fast turn logic
+        if keys[pygame.K_LSHIFT] or keys[pygame.K_RSHIFT]:
+            yoke_pull = 5  # Increase the speed for debugging or fast movement
+        else:
+            yoke_pull = 1  # Reset to normal speed
+
         # For relative movement against starfield
         ship_yaw_change = ship.turn_speed * dt if keys[pygame.K_d] else -ship.turn_speed * dt if keys[pygame.K_a] else 0
-        ship_pitch_change = ship.turn_speed * dt if keys[pygame.K_s] else -ship.turn_speed * dt if keys[
-            pygame.K_w] else 0
+        ship_pitch_change = ship.turn_speed * dt if keys[pygame.K_s] else -ship.turn_speed * dt \
+            if keys[pygame.K_w] else 0
 
         # Update ship's orientation
         ship.angle += ship_yaw_change  # Assuming ship.angle incorporates both yaw and pitch
 
         # Relative location of space objects
         for planetoid in planetoids:
+            modified_orbit_speed = planetoid.orbit_speed * yoke_pull
             if keys[pygame.K_w]:
                 ship.pitch_down(dt)
                 if not planetoid.behind_player:
-                    planetoid.position.y -= planetoid.orbit_speed
+                    planetoid.position.y -= modified_orbit_speed
                     if planetoid.position.y <= 0 - planetoid_padding:
                         planetoid.behind_player = True
                         planetoid.is_visible = False
                 else:
-                    planetoid.position.y += planetoid.orbit_speed
+                    planetoid.position.y += modified_orbit_speed
                     if planetoid.position.y >= SCREEN_HEIGHT + planetoid_padding:
                         planetoid.behind_player = False
                         planetoid.is_visible = True
             if keys[pygame.K_s]:
                 ship.pitch_down(-dt)
                 if not planetoid.behind_player:
-                    planetoid.position.y += planetoid.orbit_speed
+                    planetoid.position.y += modified_orbit_speed
                     if planetoid.position.y >= SCREEN_HEIGHT + planetoid_padding:
                         planetoid.behind_player = True
                         planetoid.is_visible = False
                 else:
-                    planetoid.position.y -= planetoid.orbit_speed
+                    planetoid.position.y -= modified_orbit_speed
                     if planetoid.position.y <= 0 - planetoid_padding:
                         planetoid.behind_player = False
                         planetoid.is_visible = True
             if keys[pygame.K_a]:
                 ship.turn(-ship.turn_speed * dt)
                 if not planetoid.behind_player:
-                    planetoid.position.x += planetoid.orbit_speed
+                    planetoid.position.x += modified_orbit_speed
                     if planetoid.position.x >= SCREEN_WIDTH + planetoid_padding:
                         planetoid.behind_player = True
                         planetoid.is_visible = False
                 else:
-                    planetoid.position.x -= planetoid.orbit_speed
+                    planetoid.position.x -= modified_orbit_speed
                     if planetoid.position.x <= 0 - planetoid_padding:
                         planetoid.behind_player = False
                         planetoid.is_visible = True
             if keys[pygame.K_d]:
                 ship.turn(ship.turn_speed * dt)
                 if not planetoid.behind_player:
-                    planetoid.position.x -= planetoid.orbit_speed
+                    planetoid.position.x -= modified_orbit_speed
                     if planetoid.position.x <= (0 - planetoid_padding):
                         planetoid.behind_player = True
                         planetoid.is_visible = False
                 else:
-                    planetoid.position.x += planetoid.orbit_speed
+                    planetoid.position.x += modified_orbit_speed
                     if planetoid.position.x >= SCREEN_WIDTH + planetoid_padding:
                         planetoid.behind_player = False
                         planetoid.is_visible = True
-
 
             planetoids.update(dt, ship_yaw_change, ship_pitch_change, ship.speed)
 
@@ -216,11 +239,16 @@ async def main():
         for planetoid in planetoids:
             if planetoid.is_visible:
                 screen.blit(planetoid.image, planetoid.rect)
+            if planetoid.object_id == "space_station_01" and game_state_manager.navpoint_001_active:
+                # Calculate the center of the planetoid image to position the cross
+                center_x = planetoid.rect.centerx
+                center_y = planetoid.rect.centery
+                draw_cross(screen, (center_x, center_y))
 
         # Overlay the cockpit image after drawing the stars
         speedometer.update(ship.speed)
         speedometer.draw(screen)
-        radar.draw(screen, planetoids, ship.position)
+        radar.draw(screen, planetoids, ship.position, game_state_manager.navpoint_001_active)
         cockpit.draw()
         comms_button.draw(screen)
         comms.update_portraits()  # updates fade effect
@@ -229,7 +257,6 @@ async def main():
         # Comms dialogue draw
         if comms.is_fully_visible('spacewoman01'):
             spacewoman01.show_current_dialogue(screen, comms)
-
 
         # Debug
         # velocity_text = f"Velocity: {ship.speed:.2f}"

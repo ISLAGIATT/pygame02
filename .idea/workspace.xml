@@ -4,10 +4,10 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="05f7812f-ee3c-44ef-964e-18c07ae7c61f" name="Changes" comment="primitive radar and speedometer">
-      <change afterPath="$PROJECT_DIR$/fonts/digital-7 (italic).ttf" afterDir="false" />
+    <list default="true" id="05f7812f-ee3c-44ef-964e-18c07ae7c61f" name="Changes" comment="refinements to speedometer and radar">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/cockpit.py" beforeDir="false" afterPath="$PROJECT_DIR$/cockpit.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/game_state_manager.py" beforeDir="false" afterPath="$PROJECT_DIR$/game_state_manager.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/stars.py" beforeDir="false" afterPath="$PROJECT_DIR$/stars.py" afterDir="false" />
     </list>
@@ -166,7 +166,15 @@
       <option name="project" value="LOCAL" />
       <updated>1712337522620</updated>
     </task>
-    <option name="localTasksCounter" value="8" />
+    <task id="LOCAL-00008" summary="refinements to speedometer and radar">
+      <option name="closed" value="true" />
+      <created>1713207411445</created>
+      <option name="number" value="00008" />
+      <option name="presentableId" value="LOCAL-00008" />
+      <option name="project" value="LOCAL" />
+      <updated>1713207411445</updated>
+    </task>
+    <option name="localTasksCounter" value="9" />
     <servers />
   </component>
   <component name="VcsManagerConfiguration">
@@ -177,6 +185,7 @@
     <MESSAGE value="scaling in relation to direction front/back" />
     <MESSAGE value="adding stars" />
     <MESSAGE value="primitive radar and speedometer" />
-    <option name="LAST_COMMIT_MESSAGE" value="primitive radar and speedometer" />
+    <MESSAGE value="refinements to speedometer and radar" />
+    <option name="LAST_COMMIT_MESSAGE" value="refinements to speedometer and radar" />
   </component>
 </project>

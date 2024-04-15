@@ -203,7 +203,7 @@ class Radar:
         self.last_blink_time = time.time()
         self.blink_state = True
 
-    def draw(self, surface, planetoids, ship_position):
+    def draw(self, surface, planetoids, ship_position, navpoint_001):
         current_time = time.time()
         if current_time - self.last_blink_time > self.blink_duration:
             self.blink_state = not self.blink_state
@@ -213,9 +213,17 @@ class Radar:
         pygame.draw.circle(surface, self.border_color, self.center_position, self.radius, self.border_thickness)
 
         for planetoid in planetoids:
-            self._draw_planetoid_on_radar(surface, planetoid, ship_position)
+            self._draw_planetoid_on_radar(surface, planetoid, ship_position, navpoint_001)
 
-    def _draw_planetoid_on_radar(self, surface, planetoid, ship_position):
+    def _draw_cross(self, surface, center_position, size=4):
+        # Draw horizontal line
+        pygame.draw.line(surface, self.radar_color, (center_position[0] - size, center_position[1]),
+                         (center_position[0] + size, center_position[1]), 2)
+        # Draw vertical line
+        pygame.draw.line(surface, self.radar_color, (center_position[0], center_position[1] - size),
+                         (center_position[0], center_position[1] + size), 2)
+
+    def _draw_planetoid_on_radar(self, surface, planetoid, ship_position, navpoint_001):
         # Calculate the relative position of the planetoid to the ship
         rel_x = planetoid.position.x - ship_position.x
         rel_y = planetoid.position.y - ship_position.y
@@ -225,10 +233,11 @@ class Radar:
         radar_x = int(self.center_position[0] + rel_x * scale_factor)
         radar_y = int(self.center_position[1] + rel_y * scale_factor)
 
-        # Draw the planetoid on the radar
-        if abs(radar_x - self.center_position[0]) <= self.radius and abs(
-                radar_y - self.center_position[1]) <= self.radius:
-            if planetoid.behind_player and self.blink_state:
-                pygame.draw.circle(surface, self.radar_color, (radar_x, radar_y), 2)
-            elif not planetoid.behind_player:
+        # Check if the planetoid is within the radar's visible range
+        if abs(radar_x - self.center_position[0]) <= self.radius and abs(radar_y - self.center_position[1]) <= self.radius:
+            if planetoid.object_id == 'space_station_01' and navpoint_001:
+                # Draw a cross for the space station
+                self._draw_cross(surface, (radar_x, radar_y))
+            else:
+                # Draw a circle for other planetoids
                 pygame.draw.circle(surface, self.radar_color, (radar_x, radar_y), 2)
