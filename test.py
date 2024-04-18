@@ -4,50 +4,57 @@ import sys
 # Initialize Pygame
 pygame.init()
 
-# Screen settings
-screen_width = 2560
-screen_height = 1440
-screen = pygame.display.set_mode((screen_width, screen_height))
-pygame.display.set_caption("Font Examples")
+# Set up the display
+screen = pygame.display.set_mode((800, 600))
+pygame.display.set_caption("Sprite Sheet Animation")
 
-# Define fonts to display (For demonstration, this will get all available fonts)
-fonts_to_display = pygame.font.get_fonts()
+# Clock for controlling frame rate
+clock = pygame.time.Clock()
 
-# Colors
-bg_color = (30, 30, 30)
-text_color = (255, 255, 255)
+# Load the sprite sheet
+sprite_sheet_image = pygame.image.load('images/PlayerWalk 48x48.png').convert_alpha()
 
-# Font settings
-font_size = 18  # Adjust based on your preference and screen size
-max_fonts_per_col = screen_height // (font_size + 10)  # Calculate how many fonts fit per column
+def get_image(x, y, width, height):
+    """Extracts a single image from a sprite sheet at x, y with the specified width and height."""
+    image = pygame.Surface((width, height), pygame.SRCALPHA)
+    image.blit(sprite_sheet_image, (0, 0), (x, y, width, height))
+    return image
 
-def draw_fonts(screen, fonts):
-    screen.fill(bg_color)
-    column_width = screen_width // (len(fonts) // max_fonts_per_col + 1)  # Calculate column width
-    x, y = 10, 10  # Starting position
+frame_width = 48
+frame_height = 48
+frames = []
+num_frames = 8  # Number of frames in the sprite sheet
+# Initialize frame variables
+frame_count = 0
+current_frame = 0
 
-    for font_name in fonts:
-        try:
-            font = pygame.font.SysFont(font_name, font_size)
-            text_surface = font.render(f"{font_name}", True, text_color)
-            screen.blit(text_surface, (x, y))
-            y += font_size + 10  # Move down to the next line
-            if y + font_size > screen_height:  # Check if we've reached the bottom of the screen
-                y = 10  # Reset Y
-                x += column_width  # Move to the next column
-        except Exception as e:
-            print(f"Error displaying font '{font_name}': {e}")
+for i in range(num_frames):
+    frame = get_image(i * frame_width, 0, frame_width, frame_height)
+    frames.append(frame)
 
-    pygame.display.flip()
-
-# Main loop
 running = True
 while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
 
-    draw_fonts(screen, fonts_to_display)
+    # Update frame based on your frame count or timer
+    frame_count += 1
+    if frame_count >= 6:  # Change the frame every 6 ticks
+        current_frame = (current_frame + 1) % num_frames
+        frame_count = 0
+
+    # Clear screen
+    screen.fill((0, 0, 0))
+
+    # Draw the current frame
+    screen.blit(frames[current_frame], (100, 100))
+
+    # Update display
+    pygame.display.flip()
+
+    # Cap the frame rate
+    clock.tick(60)
 
 pygame.quit()
 sys.exit()

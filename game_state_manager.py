@@ -1,9 +1,18 @@
+class GameState:
+    NORMAL_PLAY = 1
+    CUTSCENE = 2
+class CameraMode:
+    FIRST_PERSON = 1
+    EXTERNAL = 2
+
 class GameStateManager:
     def __init__(self):
         self.current_room_id = None
         self.current_open_dropdown = None
         self.target_alpha_reached = False
         self.navpoint_001_active = False
+        self.current_state = GameState.NORMAL_PLAY
+        self.camera_mode = CameraMode.FIRST_PERSON
 
         self.rooms = {
             'room1': {  # test room 1
@@ -14,6 +23,13 @@ class GameStateManager:
                 'exits': ['west door', 'north door'],
             }
         }
+
+    def set_camera_mode(self, mode):
+        self.camera_mode = mode
+
+    def set_state(self, new_state):
+        self.current_state = new_state
+
     def set_target_alpha_reached(self, value: bool):
         self.target_alpha_reached = value
 

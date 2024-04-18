@@ -3,6 +3,7 @@ import pygame
 import pygame.sprite
 import random
 
+
 from button import Button, TransparentButton
 from cockpit import Cockpit, Comms, Speedometer, Radar
 from game_objects import SpaceWoman01
@@ -36,6 +37,11 @@ async def main():
 
     ship = Ship(position=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2), speed=.5, turn_speed=800)
     cockpit = Cockpit('images/starfighter01.png', screen)
+    stick_back_img = Cockpit('images/starfighter02_stickback.png', screen)
+    stick_forward_img = Cockpit('images/starfighter02_stickforward.png', screen)
+    stick_left_img = Cockpit('images/starfighter02_stickleft.png', screen)
+    stick_right_img = Cockpit('images/starfighter02_stickright.png', screen)
+    current_stick_img = cockpit
     speedometer = Speedometer((738, 724))
     radar_position = (513, 622)
     radar = Radar(radar_position, 80)
@@ -119,16 +125,13 @@ async def main():
         interactive_objects=[spacewoman01],
         dropdown_menus=None)
 
-    # orbit speed = perspective turn speed
-    planetoid_orbit_speed = 10
-
     # avoid fat planets disappearing before fully off-screen
     planetoid_padding = 30
-    # normal vs fast turn
-    yoke_pull = 1
 
     run = True
+    
     while run:
+
         # Movement
         dt = clock.tick(60) / 1000.0  # Converts milliseconds to seconds
         keys = pygame.key.get_pressed()
@@ -199,7 +202,20 @@ async def main():
                         planetoid.behind_player = False
                         planetoid.is_visible = True
 
-            planetoids.update(dt, ship_yaw_change, ship_pitch_change, ship.speed)
+            SCREEN_CENTER = pygame.Vector2(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2) # screen center data for quadratic scaling
+            planetoids.update(dt, ship_yaw_change, ship_pitch_change, ship.speed, SCREEN_CENTER)
+
+        # Update stick image based on key press
+        if keys[pygame.K_w]:
+            current_stick_img = stick_forward_img
+        elif keys[pygame.K_s]:
+            current_stick_img = stick_back_img
+        elif keys[pygame.K_a]:
+            current_stick_img = stick_left_img
+        elif keys[pygame.K_d]:
+            current_stick_img = stick_right_img
+        else:
+            current_stick_img = cockpit
 
         # Throttle/ scaling speed
         if keys[pygame.K_UP]:  # Speed up
@@ -216,6 +232,19 @@ async def main():
                 button = event.button
                 print(f"Mouse pos: {mouse_pos}")
                 mouse_event_handler.handle_click(event.pos, event.button)
+            # elif event.type == pygame.KEYDOWN:
+            #     if event.key == pygame.K_SPACE:
+            #         print("Spacebar pressed - loading landing scene.")
+            #         pygame.mixer.music.stop()  # Optionally stop the music
+            #         result = subprocess.run(['python', 'landing_scene.py'], capture_output=True, text=True)
+            #         if result.returncode != 0:
+            #             print("Error running landing_scene.py:", result.stderr)
+            #         else:
+            #             print("Landing scene completed successfully.")
+            #             # Process result.stdout if needed
+            #         # Continue with game or transition to another scene
+            #         print("Returning to main game or next scene.")
+
 
         # Fill the screen with black to clear old frames
         screen.fill(BLACK)
@@ -236,6 +265,7 @@ async def main():
             comet.update(ship_yaw_change, ship_pitch_change, dt)
             comet.draw(screen)
 
+
         for planetoid in planetoids:
             if planetoid.is_visible:
                 screen.blit(planetoid.image, planetoid.rect)
@@ -249,7 +279,7 @@ async def main():
         speedometer.update(ship.speed)
         speedometer.draw(screen)
         radar.draw(screen, planetoids, ship.position, game_state_manager.navpoint_001_active)
-        cockpit.draw()
+        current_stick_img.draw()
         comms_button.draw(screen)
         comms.update_portraits()  # updates fade effect
         comms.draw()

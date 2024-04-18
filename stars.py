@@ -79,13 +79,23 @@ class Planetoid(pygame.sprite.Sprite):
         self.image = pygame.transform.scale(self.original_image, (scaled_width, scaled_height))
         self.rect = self.image.get_rect(center=self.position)
 
-    def update(self, dt, ship_yaw_change, ship_pitch_change, ship_speed):
-        if not self.behind_player:
-            self.scale_factor += ship_speed * dt * self.scaling_rate  # Use scaling rate here
-        else:
-            self.scale_factor -= ship_speed * dt * self.scaling_rate
+    def update(self, dt, ship_yaw_change, ship_pitch_change, ship_speed, screen_center):
+        # Calculate the distance from the planetoid to the screen center
+        distance_to_center = self.position.distance_to(screen_center)
 
-        # Clamp the scale factor to prevent it from going below or above desired thresholds
+        # Normalize the distance based on screen size for consistent behavior on different resolutions
+        max_distance = (screen_center.x ** 2 + screen_center.y ** 2) ** 0.5
+        normalized_distance = distance_to_center / max_distance
+
+        # Adjust the scaling rate based on how close the object is to the screen's center
+        adjusted_scaling_rate = self.scaling_rate * (1 - normalized_distance) ** 2  # Quadratic falloff
+
+        if not self.behind_player:
+            self.scale_factor += ship_speed * dt * adjusted_scaling_rate
+        else:
+            self.scale_factor -= ship_speed * dt * adjusted_scaling_rate
+
+        # Clamp the scale factor to prevent it from going too low or too high
         self.scale_factor = max(0.1, min(self.scale_factor, 5.0))
 
         self.update_image()
