@@ -3,7 +3,6 @@ import pygame
 import pygame.sprite
 import random
 
-
 from button import Button, TransparentButton
 from cockpit import Cockpit, Comms, Speedometer, Radar
 from game_objects import SpaceWoman01
@@ -232,18 +231,6 @@ async def main():
                 button = event.button
                 print(f"Mouse pos: {mouse_pos}")
                 mouse_event_handler.handle_click(event.pos, event.button)
-            # elif event.type == pygame.KEYDOWN:
-            #     if event.key == pygame.K_SPACE:
-            #         print("Spacebar pressed - loading landing scene.")
-            #         pygame.mixer.music.stop()  # Optionally stop the music
-            #         result = subprocess.run(['python', 'landing_scene.py'], capture_output=True, text=True)
-            #         if result.returncode != 0:
-            #             print("Error running landing_scene.py:", result.stderr)
-            #         else:
-            #             print("Landing scene completed successfully.")
-            #             # Process result.stdout if needed
-            #         # Continue with game or transition to another scene
-            #         print("Returning to main game or next scene.")
 
 
         # Fill the screen with black to clear old frames
@@ -264,7 +251,6 @@ async def main():
         for comet in comets:
             comet.update(ship_yaw_change, ship_pitch_change, dt)
             comet.draw(screen)
-
 
         for planetoid in planetoids:
             if planetoid.is_visible:

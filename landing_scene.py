@@ -1,168 +1,179 @@
-import asyncio
 import pygame
 import pygame.sprite
 import random
+import time
 
 from stars import Star, Comet, Planetoid
 from mouse_event import MouseEventHandler
 
-pygame.init()
-clock = pygame.time.Clock()
-SCREEN_WIDTH = 1024
-SCREEN_HEIGHT = 1024
-screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 mouse_event_handler = MouseEventHandler
+class LandingScene:
+    def __init__(self, screen):
+        self.screen = screen
+        self.clock = pygame.time.Clock()
+        self.run = True
+        #self.mouse_event_handler = MouseEventHandler()
 
-spaceport_img = pygame.image.load('images/space_station_landing01.png')
-spaceport_rect = spaceport_img.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2))
+        # Load images and setup positions
+        self.spaceport_img = pygame.image.load('images/space_station_landing01.png')
+        self.spaceport_rect = self.spaceport_img.get_rect(center=(screen.get_width() // 2, screen.get_height() // 2))
+        self.original_ship_img = pygame.image.load('images/ship_landing.png')
+        self.ship_rect = self.original_ship_img.get_rect(
+            center=(screen.get_width() // 2, -self.original_ship_img.get_height()))
+        self.landing_x = 559
+        self.landing_y = 870
+        self.landing_speed = 175  # Define landing speed here
+        self.scaling_rate = .001
+        self.ship_img = None
 
-original_ship_img = pygame.image.load('images/ship_landing.png')
-ship_rect = original_ship_img.get_rect(
-    center=(SCREEN_WIDTH // 2, -original_ship_img.get_height()))  # Start above the screen
-landing_x = 559
-landing_y = 906
+        self.person_sprite_sheet_image = pygame.image.load('images/PlayerWalk 48x48.png').convert_alpha()
+        self.delay_start_time = None
 
-person_sprite_sheet_image = pygame.image.load('images/PlayerWalk 48x48.png').convert_alpha()
+        self.person_frames = [self.get_person_image(i * 48, 0, 48, 48) for i in range(8)]
+        self.person_current_frame = 0
+        self.person_frame_count = 0
+        self.person_position = [self.ship_rect.centerx, self.ship_rect.bottom]
+        self.person_walking_speed = 150
+        self.person_visible = False
+        self.person_walking = False
 
-def get_person_image(x, y, width, height):
-    image = pygame.Surface((width, height), pygame.SRCALPHA)
-    image.blit(person_sprite_sheet_image, (0, 0), (x, y, width, height))
-    return image
+        self.stars = [Star(screen.get_width(), screen.get_height()) for _ in range(300)]
+        self.comets = []
+        self.planetoids = pygame.sprite.LayeredUpdates()
+        self.setup_planetoids()
+
+        self.current_scale = 1.0
+        self.zoom_out_rate = 0.99  # Adjust the rate as needed
+        self.zoom_out = False
+
+        pygame.mixer.music.load("./music/Ancient-Game-Menu.mp3")
+        pygame.mixer.music.set_volume(0.50)
+        pygame.mixer.music.play(loops=-1)
+
+    def get_person_image(self, x, y, width, height):
+        image = pygame.Surface((width, height), pygame.SRCALPHA)
+        image.blit(self.person_sprite_sheet_image, (0, 0), (x, y, width, height))
+        return image
+
+    def setup_planetoids(self):
+        planetoid_01 = Planetoid('images/green_planet01.png', (600, 300), "planetoid_01", initial_scale=0.15,
+                                 scaling_rate=.00005, orbit_speed=1)
+        star_01 = Planetoid('images/star01.png', (400, 400), "star_01", initial_scale=.2, scaling_rate=0,
+                            orbit_speed=.25)
+        self.planetoids.add(star_01, layer=0)
+        self.planetoids.add(planetoid_01, layer=1)
+
+    def update(self, dt):
+        # Calculate distance to landing zone
+        distance_to_landing = self.landing_y - self.ship_rect.centery
+
+        # Slow down as it approaches landing
+        if distance_to_landing < 200:
+            self.landing_speed = 100
+
+        # Move ship towards landing zone
+        if self.ship_rect.centery < self.landing_y:
+            self.ship_rect.centery += int(self.landing_speed * dt)
+            self.ship_rect.centerx += int((self.landing_x - self.ship_rect.centerx) / 10)
+        else:
+            self.ship_rect.centery = self.landing_y
+            if self.delay_start_time is None:
+                self.delay_start_time = pygame.time.get_ticks()
+                print(f"Delay start time set: {self.delay_start_time}")
+
+        # Calculate scaling based on distance
+        if distance_to_landing >= 500:
+            scaling_factor = 1 + self.scaling_rate * (800 - distance_to_landing)
+        elif distance_to_landing < 500:
+            scaling_factor = 1 - self.scaling_rate * (500 - distance_to_landing)
+        else:
+            scaling_factor = 1
 
 
-person_frame_width = 48  # Assuming each frame is 48x48
-person_frame_height = 48
-person_frames = []
-num_person_frames = 8  # Total frames in the sprite sheet
+        # Apply scaling to ship image
+        self.ship_img = pygame.transform.scale(self.original_ship_img, (
+            int(self.original_ship_img.get_width() * scaling_factor),
+            int(self.original_ship_img.get_height() * scaling_factor)))
+        self.ship_rect = self.ship_img.get_rect(center=(self.ship_rect.centerx, self.ship_rect.centery))
 
-for i in range(num_person_frames):
-    frame = get_person_image(i * person_frame_width, 0, person_frame_width, person_frame_height)
-    person_frames.append(frame)
+        if self.delay_start_time and pygame.time.get_ticks() - self.delay_start_time >= 1000:
+            print('timer block')
+            if not self.person_walking:
+                self.person_visible = True
+                self.person_walking = True
+                # Reset the delay timer
+                # self.delay_start_time = None
+                print(f"{self.person_visible}")
+                print(f"{self.person_walking}")
+                print(f"{self.delay_start_time}")
 
-person_current_frame = 0
-person_frame_count = 0
-person_position = [ship_rect.centerx, ship_rect.bottom]  # Starting position
-person_walking_speed = 150  # Pixels per second
-person_walking = False
-person_visible = False
+        if self.person_walking:
+            self.person_frame_count += 1
+            if self.person_frame_count >= 6:
+                self.person_current_frame = (self.person_current_frame + 1) % len(self.person_frames)
+                self.person_frame_count = 0
+            self.person_position[0] += int(self.person_walking_speed * dt)
 
+            if self.person_position[0] >= 925:
+                self.person_visible = False
+                self.person_walking = False
+                self.zoom_out = True
 
-NUM_STARS = 300
-stars = [Star(SCREEN_WIDTH, SCREEN_HEIGHT) for _ in range(NUM_STARS)]
-comets = []
-planetoids = pygame.sprite.LayeredUpdates()
+        # Check if we should start zooming out
+        if self.zoom_out:
+            if self.current_scale > 0.5:  # Prevent scaling too small
+                self.current_scale *= self.zoom_out_rate
+            else:
+                self.zoom_out = False  # Stop zooming when minimum scale is reached
 
-planetoid_01 = Planetoid('images/green_planet01.png',
-                         (600, 300),
-                         "planetoid_01",
-                         initial_scale=0.15,
-                         scaling_rate=.00005,
-                         orbit_speed=1)
+        # Update comets randomly
+        if random.randrange(0, 1000) == 0:
+            self.comets.append(Comet(self.screen.get_width(), self.screen.get_height()))
+        self.comets = [comet for comet in self.comets if comet.x > -100]
 
-star_01 = Planetoid('images/star01.png',
-                    (400, 400),
-                    "star_01",
-                    initial_scale=.2,
-                    scaling_rate=0,
-                    orbit_speed=.25)
-# Add sprites with a specific layer
-planetoids.add(star_01, layer=0)  # Ensure star_01 is on the bottom layer
-planetoids.add(planetoid_01, layer=1)
+    def render(self):
+        self.screen.fill((0, 0, 0))
 
-pygame.mixer.music.load("./music/Ancient-Game-Menu.mp3")
-pygame.mixer.music.set_volume(0.50)
-pygame.mixer.music.play(loops=-1)
+        # Draw stars
+        for star in self.stars:
+            star.draw(self.screen)
 
-run = True
-landing_speed = 175  # Pixels per second
-scaling_rate = 0.001  # Adjust this rate as needed
+        # Draw comets
+        for comet in self.comets:
+            comet.draw(self.screen)
 
-while run:
-    dt = clock.tick(60) / 1000.0  # Converts milliseconds to seconds
-    keys = pygame.key.get_pressed()
+        # Draw planetoids
+        for planetoid in self.planetoids:
+            self.screen.blit(planetoid.image, planetoid.rect)
 
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            pygame.mixer.music.stop()
-            run = False
-        elif event.type == pygame.MOUSEBUTTONDOWN:
-            mouse_pos = event.pos
-            button = event.button
-            print(f"Mouse pos: {mouse_pos}")
-            mouse_event_handler.handle_click(event.pos, event.button)
+        # Draw spaceport
+        self.screen.blit(self.spaceport_img, self.spaceport_rect)
 
-    screen.fill((0, 0, 0))
+        # Draw ship
+        self.screen.blit(self.ship_img, self.ship_rect)
 
-    for star in stars:
-        star.draw(screen)
-    # An occasional comet
-    if random.randrange(0, 1000) == 0:  # Adjust chances as needed
-        comets.append(Comet(SCREEN_WIDTH, SCREEN_HEIGHT))
-    comets = [comet for comet in comets if comet.x > -100]  # Adjust threshold as needed
+        # Draw walking person
+        if self.person_visible:
+            self.screen.blit(self.person_frames[self.person_current_frame], (self.person_position[0] + 40, self.landing_y - 13))
 
-    # # Update and draw comets
-    for comet in comets:
-        comet.draw(screen)
+        pygame.display.flip()
 
-    for planetoid in planetoids:
-        screen.blit(planetoid.image, planetoid.rect)
+    def handle_events(self):
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.mixer.music.stop()
+                self.run = False
+            elif event.type == pygame.MOUSEBUTTONDOWN:
+                self.mouse_event_handler.handle_click(event.pos, event.button)
+            elif event.type == pygame.KEYDOWN:
+                # Add more key handling as necessary
+                if event.key == pygame.K_SPACE:
+                    print("Spacebar pressed!")  # Example action
 
-    # Draw the spaceport
-    screen.blit(spaceport_img, spaceport_rect)
+    def run_scene(self):
+        while self.run:
+            dt = self.clock.tick(60) / 1000.0
+            self.handle_events()
+            self.update(dt)
+            self.render()
 
-    # Calculate the distance to the landing zone and adjust landing speed and scaling
-    distance_to_landing = landing_y - ship_rect.centery
-
-    if 800 > distance_to_landing >= 500:
-        # Scale larger as the ship approaches 800px to 500px away
-        scaling_factor = 1 + scaling_rate * (800 - distance_to_landing)
-    elif distance_to_landing < 500:
-        # Scale smaller as the ship gets closer than 500px
-        scaling_factor = 1 - scaling_rate * (500 - distance_to_landing)
-    else:
-        scaling_factor = 1
-
-    ship_img = pygame.transform.scale(original_ship_img, (
-        int(original_ship_img.get_width() * scaling_factor), int(original_ship_img.get_height() * scaling_factor)))
-    ship_rect = ship_img.get_rect(center=(SCREEN_WIDTH // 2, ship_rect.centery))
-
-    if distance_to_landing < 200:
-        landing_speed = 100  # Reduce speed by 75%
-
-    if ship_rect.centery < landing_y:
-        ship_rect.centery += int(landing_speed * dt)
-        ship_rect.centerx += int((landing_x - ship_rect.centerx) / 10)  # Gradually move x-position
-    else:
-        ship_rect.centery = landing_y  # Ensure the ship doesn't go below the landing point
-        if abs(ship_rect.centerx - landing_x) < 5:
-            ship_rect.centerx = landing_x
-
-    if ship_rect.centery == landing_y and not person_walking:
-        person_visible = True
-        person_walking = True  # Start walking animation once the ship has landed
-        print("Walking animation started.")  # Debug print
-
-    if person_walking:
-        person_frame_count += 1
-        if person_frame_count >= 6:
-            person_current_frame = (person_current_frame + 1) % num_person_frames
-            person_frame_count = 0
-        person_position[0] += int(person_walking_speed * dt)  # Move right
-
-        if person_position[0] >= 950:
-            person_visible = False
-            person_walking = False
-
-        if person_visible:
-            screen.blit(person_frames[person_current_frame], (person_position[0], landing_y - person_frame_height))
-
-        # Debug prints
-        print(f"Animating: {person_position[0]}, Frame: {person_current_frame}")
-
-        # Stop walking when reaching the right edge of the screen
-        if person_position[0] > SCREEN_WIDTH:
-            person_walking = False
-
-    screen.blit(ship_img, ship_rect)
-
-    pygame.display.flip()
