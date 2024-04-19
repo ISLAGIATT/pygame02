@@ -30,7 +30,7 @@ class Star:
 
         # Draw stars (circles) here
         radius = max(1, 2 * (1 - self.z))
-        if abs(x_2d) < 10000 and abs(y_2d) < 10000:  # Arbitrary large value check
+        if abs(x_2d) < 10000 and abs(y_2d) < 10000:  # Arbitrary large value check so it dont crash
             pygame.draw.circle(screen, (255, 255, 255), (int(x_2d), int(y_2d)), radius)
 
 class Comet:
@@ -60,20 +60,23 @@ class Comet:
         pygame.draw.line(screen, self.WHITE, (int(self.x), int(self.y)), (int(self.x) + tail_length, int(self.y)), tail_width)
 
 class Planetoid(pygame.sprite.Sprite):
-    def __init__(self, image_path, position, object_id, initial_scale=1.0, scaling_rate=0.0005, orbit_speed=5):
+    def __init__(self, image_path, position, object_id, initial_scale=1.0, scaling_rate=0.0005, orbit_speed=5, max_scale=2.0):
         super().__init__()
         self.original_image = pygame.image.load(image_path).convert_alpha()
         self.position = pygame.Vector2(position)
         self.scale_factor = initial_scale
         self.scaling_rate = scaling_rate
         self.orbit_speed = orbit_speed
+        self.max_scale = max_scale
         self.update_image()
         self.behind_player = False
         self.is_visible = True
         self.object_id = object_id
+        self.comms_distance = False  # close enough for comms?
 
     def update_image(self):
-        # Apply the new scale to the planetoid image
+
+        # Apply scaling to the planetoid image
         scaled_width = int(self.original_image.get_width() * self.scale_factor)
         scaled_height = int(self.original_image.get_height() * self.scale_factor)
         self.image = pygame.transform.scale(self.original_image, (scaled_width, scaled_height))
@@ -90,12 +93,18 @@ class Planetoid(pygame.sprite.Sprite):
         # Adjust the scaling rate based on how close the object is to the screen's center
         adjusted_scaling_rate = self.scaling_rate * (1 - normalized_distance) ** 2  # Quadratic falloff
 
+        # things get closer when you face them. get further when behind you
         if not self.behind_player:
             self.scale_factor += ship_speed * dt * adjusted_scaling_rate
         else:
             self.scale_factor -= ship_speed * dt * adjusted_scaling_rate
 
-        # Clamp the scale factor to prevent it from going too low or too high
-        self.scale_factor = max(0.1, min(self.scale_factor, 5.0))
+        # Clamp the scale factor using the max_scale value
+        self.scale_factor = max(0.1, min(self.scale_factor, self.max_scale))
+
+        # Check if scale_factor of space_station_01 reaches 0.75
+        if self.object_id == "space_station_01" and self.scale_factor >= 0.75 and not self.comms_distance:
+            self.comms_distance = True
+
 
         self.update_image()

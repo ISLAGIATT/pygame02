@@ -9,25 +9,25 @@ class Cockpit:
         self.instruments = [
             # Red rect button left of yoke
             {'position': (442, 842), 'color': (255, 0, 0), 'size': (7, 5), 'shape': 'rectangle', 'glow': True,
-             'fade_direction': 1, 'current_alpha': 128, 'max_brightness': 150, 'fade_speed': 3},
+             'fade_direction': 1, 'current_alpha': 128, 'max_brightness': 175, 'fade_speed': 3},
             # Yellow rect button left of yoke
             {'position': (465, 842), 'color': (210, 126, 56), 'size': (7, 5), 'shape': 'rectangle', 'glow': True,
-             'fade_direction': 1, 'current_alpha': 128, 'max_brightness': 150, 'fade_speed': 3},
+             'fade_direction': 1, 'current_alpha': 128, 'max_brightness': 175, 'fade_speed': 3},
             # Panel left of radar, top left red
             {'position': (332, 550), 'color': (255, 99, 78), 'size': (10, 10), 'shape': 'circle', 'glow': True,
-             'fade_direction': 1, 'current_alpha': 128, 'max_brightness': 200, 'fade_speed': 3},
+             'fade_direction': 1, 'current_alpha': 128, 'max_brightness': 225, 'fade_speed': 3},
             # Panel left of radar, top right red
             {'position': (373, 548), 'color': (255, 99, 78), 'size': (10, 10), 'shape': 'circle', 'glow': True,
-             'fade_direction': 1, 'current_alpha': 128, 'max_brightness': 200, 'fade_speed': 5},
+             'fade_direction': 1, 'current_alpha': 128, 'max_brightness': 225, 'fade_speed': 5},
             # Panel left of radar, bottom right red
             {'position': (373, 596), 'color': (255, 99, 78), 'size': (10, 10), 'shape': 'circle', 'glow': True,
-             'fade_direction': 1, 'current_alpha': 128, 'max_brightness': 200, 'fade_speed': 8},
+             'fade_direction': 1, 'current_alpha': 128, 'max_brightness': 225, 'fade_speed': 8},
             # Panel left of radar, top left yellow
             {'position': (330, 646), 'color': (255, 207, 116), 'size': (12, 12), 'shape': 'circle', 'glow': True,
-             'fade_direction': 1, 'current_alpha': 128, 'max_brightness': 200, 'fade_speed': 1},
+             'fade_direction': 1, 'current_alpha': 128, 'max_brightness': 225, 'fade_speed': 1},
             # Panel left of radar, top right yellow
             {'position': (374, 647), 'color': (251, 219, 66), 'size': (12, 12), 'shape': 'circle', 'glow': True,
-             'fade_direction': 1, 'current_alpha': 128, 'max_brightness': 150, 'fade_speed': 2},
+             'fade_direction': 1, 'current_alpha': 128, 'max_brightness': 175, 'fade_speed': 2},
             # Panel left of radar, bottom left yellow
             {'position': (332, 694), 'color': (251, 219, 66), 'size': (12, 12), 'shape': 'circle', 'glow': True,
              'fade_direction': 1, 'current_alpha': 128, 'max_brightness': 150, 'fade_speed': 2},
@@ -40,10 +40,12 @@ class Cockpit:
             # Large round yellow dial far left, bottom
             {'position': (259, 686), 'color': (251, 219, 66), 'size': (15, 15), 'shape': 'circle', 'glow': True,
              'fade_direction': 1, 'current_alpha': 128, 'max_brightness': 150, 'fade_speed': 4},
-            # Comms button
-            {'position': (839, 840), 'color': (251, 125, 70), 'size': (10, 10), 'shape': 'circle', 'glow': True,
-             'fade_direction': 1, 'current_alpha': 128, 'max_brightness': 150, 'fade_speed': 8},
-
+            # Comms in button
+            {'position': (839, 840), 'color': (251, 125, 70), 'size': (13, 13), 'shape': 'circle', 'glow': True,
+             'fade_direction': 1, 'current_alpha': 128, 'max_brightness': 200, 'fade_speed': 8, 'button_id': 'comms_in'},
+            # Comms out button
+            {'position': (790, 798), 'color': (234, 197, 87), 'size': (18, 12), 'shape': 'circle', 'glow': False,
+             'fade_direction': 1, 'current_alpha': 128, 'max_brightness': 175, 'fade_speed': 2, 'button_id': 'comms_out'},
         ]
 
     def draw(self):

@@ -3,10 +3,12 @@ import pygame.sprite
 import random
 import time
 
-from stars import Star, Comet, Planetoid
+from game_state_manager import GameStateManager
 from mouse_event import MouseEventHandler
+from stars import Star, Comet, Planetoid
 
 mouse_event_handler = MouseEventHandler
+game_state_manager = GameStateManager
 class LandingScene:
     def __init__(self, screen):
         self.screen = screen
@@ -56,7 +58,7 @@ class LandingScene:
         return image
 
     def setup_planetoids(self):
-        planetoid_01 = Planetoid('images/green_planet01.png', (600, 300), "planetoid_01", initial_scale=0.15,
+        planetoid_01 = Planetoid('images/green_planet01.png', (300, 300), "planetoid_01", initial_scale=0.30,
                                  scaling_rate=.00005, orbit_speed=1)
         star_01 = Planetoid('images/star01.png', (400, 400), "star_01", initial_scale=.2, scaling_rate=0,
                             orbit_speed=.25)
@@ -79,7 +81,7 @@ class LandingScene:
             self.ship_rect.centery = self.landing_y
             if self.delay_start_time is None:
                 self.delay_start_time = pygame.time.get_ticks()
-                print(f"Delay start time set: {self.delay_start_time}")
+
 
         # Calculate scaling based on distance
         if distance_to_landing >= 500:
@@ -97,15 +99,9 @@ class LandingScene:
         self.ship_rect = self.ship_img.get_rect(center=(self.ship_rect.centerx, self.ship_rect.centery))
 
         if self.delay_start_time and pygame.time.get_ticks() - self.delay_start_time >= 1000:
-            print('timer block')
             if not self.person_walking:
                 self.person_visible = True
                 self.person_walking = True
-                # Reset the delay timer
-                # self.delay_start_time = None
-                print(f"{self.person_visible}")
-                print(f"{self.person_walking}")
-                print(f"{self.delay_start_time}")
 
         if self.person_walking:
             self.person_frame_count += 1
@@ -117,14 +113,6 @@ class LandingScene:
             if self.person_position[0] >= 925:
                 self.person_visible = False
                 self.person_walking = False
-                self.zoom_out = True
-
-        # Check if we should start zooming out
-        if self.zoom_out:
-            if self.current_scale > 0.5:  # Prevent scaling too small
-                self.current_scale *= self.zoom_out_rate
-            else:
-                self.zoom_out = False  # Stop zooming when minimum scale is reached
 
         # Update comets randomly
         if random.randrange(0, 1000) == 0:
@@ -176,4 +164,3 @@ class LandingScene:
             self.handle_events()
             self.update(dt)
             self.render()
-
