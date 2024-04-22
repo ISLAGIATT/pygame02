@@ -3,8 +3,10 @@ import random
 import time
 
 class Cockpit:
-    def __init__(self, image_path, screen):
-        self.image = pygame.image.load(image_path).convert_alpha()
+    def __init__(self, images, screen):
+        # Expect images to be a dictionary with keys as identifiers and values as image paths
+        self.images = {key: pygame.image.load(path).convert_alpha() for key, path in images.items()}
+        self.current_image = self.images[next(iter(images))]  # Default to the first image
         self.screen = screen
         self.instruments = [
             # Red rect button left of yoke
@@ -49,11 +51,17 @@ class Cockpit:
         ]
 
     def draw(self):
-        self.screen.blit(self.image, (0, 0))
+        self.screen.blit(self.current_image, (0, 0))
         for instrument in self.instruments:
             if instrument['glow']:
                 self.draw_glow(instrument['position'], instrument['color'], instrument['size'],
                                instrument['shape'], instrument)
+
+    def switch_image(self, key):
+        if key in self.images:
+            self.current_image = self.images[key]
+        else:
+            print(f"No image found for key: {key}")
 
     def draw_glow(self, position, color, size, shape='circle', instrument=None):
         if instrument:
@@ -76,6 +84,8 @@ class Cockpit:
             pygame.draw.rect(glow_surface, glow_color, (0, 0, size[0] * 2, size[1] * 2))
         position = (position[0] - size[0], position[1] - size[1])
         self.screen.blit(glow_surface, position)
+
+
 
 class Comms:
     def __init__(self, screen):
@@ -130,16 +140,23 @@ class Comms:
                 portrait['normal_duration'] = random.randrange(1, 5)  # Optional reset **was 10/20
                 portrait['static_duration'] = .1
 
-    def toggle_visibility(self):
+    def toggle_visibility(self, portrait_id=None, target_alpha=None):
         current_time = time.time()
         self.is_visible = not self.is_visible
         # Update target alpha and potentially reset durations (depending on desired behavior)
-        target_alpha = 85 if self.is_visible else 0
         for portrait in self.portraits:
-            if self.is_visible and portrait['current_alpha'] == 85 and target_alpha == 85:
-                portrait['current_alpha'] = 0  # Ensure fade in from 0
-            portrait['target_alpha'] = target_alpha
-            portrait['last_toggle_time'] = current_time
+            target_alpha = 85 if self.is_visible else 0
+            if portrait is None or portrait['id'] == portrait_id:
+                if target_alpha is not None:
+                    portrait['target_alpha'] = target_alpha
+                else:
+                    # Toggle logic
+                    if portrait['target_alpha'] == 0:
+                        portrait['target_alpha'] = 85  # Default full visibility
+                    else:
+                        portrait['target_alpha'] = 0
+                portrait['last_toggle_time'] = current_time
+
 
     def draw(self):
         # Draw portraits regardless of is_visible, but use current_alpha to control visibility
@@ -152,7 +169,9 @@ class Comms:
 
     def is_fully_visible(self, portrait_id):
         for portrait in self.portraits:
-            return all(portrait['current_alpha'] == 85 for portrait in self.portraits)
+            if portrait['id'] == portrait_id and portrait['current_alpha'] == 85:
+                return True
+        return False
 
 class Speedometer:
     def __init__(self, position, font_size=18, font_color=(255, 0, 0), box_color=(0, 0, 0), box_padding=10,

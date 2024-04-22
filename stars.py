@@ -75,7 +75,6 @@ class Planetoid(pygame.sprite.Sprite):
         self.comms_distance = False  # close enough for comms?
 
     def update_image(self):
-
         # Apply scaling to the planetoid image
         scaled_width = int(self.original_image.get_width() * self.scale_factor)
         scaled_height = int(self.original_image.get_height() * self.scale_factor)

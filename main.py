@@ -5,7 +5,7 @@ import random
 
 from button import Button, TransparentButton
 from cockpit import Cockpit, Comms, Speedometer, Radar
-from game_objects import SpaceWoman01
+from game_objects import SpaceWoman01, StationChief01
 from game_state_manager import GameStateManager
 from landing_scene import LandingScene
 from mouse_event import MouseEventHandler
@@ -36,11 +36,13 @@ async def main():
     clock = pygame.time.Clock()
 
     ship = Ship(position=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2), speed=.5, turn_speed=800)
-    cockpit = Cockpit('images/starfighter01.png', screen)
-    stick_back_img = Cockpit('images/starfighter02_stickback.png', screen)
-    stick_forward_img = Cockpit('images/starfighter02_stickforward.png', screen)
-    stick_left_img = Cockpit('images/starfighter02_stickleft.png', screen)
-    stick_right_img = Cockpit('images/starfighter02_stickright.png', screen)
+    cockpit_images = {
+        'default': 'images/starfighter01.png',
+        'steering_left': 'images/starfighter02_stickleft.png',
+        'steering_right': 'images/starfighter02_stickright.png',
+        'stick_back': 'images/starfighter02_stickback.png',
+        'stick_forward': 'images/starfighter02_stickforward.png'}
+    cockpit = Cockpit(cockpit_images, screen)
     speedometer = Speedometer((738, 724))
     radar_position = (513, 622)
     radar = Radar(radar_position, 80)
@@ -48,9 +50,9 @@ async def main():
     NUM_STARS = 300
     stars = [Star(SCREEN_WIDTH, SCREEN_HEIGHT) for _ in range(NUM_STARS)]
     comets = []
-    planetoids = pygame.sprite.LayeredUpdates()
 
-    # intial scale = distance away
+    # Planetoid objects: intial scale = distance away
+    planetoids = pygame.sprite.LayeredUpdates()
     planetoid_01 = Planetoid('images/green_planet01.png',
                              (600, 300),
                              "planetoid_01",
@@ -76,55 +78,8 @@ async def main():
     planetoids.add(planetoid_01, layer=1)
     planetoids.add(space_station_01, layer=2)
 
-    def spacewoman_comms_routine():
-        if not comms.is_fully_visible('spacewoman01'):
-            comms.toggle_visibility()
-        else:
-            spacewoman01.dialogue_index += 1
-        if spacewoman01.dialogue_index == len(spacewoman01.dialogue):
-            comms.toggle_visibility()
-            cockpit.instruments[11]['glow'] = False
-            # direct to space station now
-            game_state_manager.navpoint_001_active = True
-
-    def landing_comms_routine():
-        space_station_01 = next((p for p in planetoids if p.object_id == "space_station_01"), None)
-        if space_station_01 and space_station_01.comms_distance and game_state_manager.navpoint_001_active:
-            cockpit.instruments[12]['glow'] = True
-
 
     #onscreen nav point marker
-    def draw_cross(surface, position, size=10, color=(255, 0, 0), thickness=2):
-        x, y = position
-        pygame.draw.line(surface, color, (x - size, y), (x + size, y), thickness)
-        pygame.draw.line(surface, color, (x, y - size), (x, y + size), thickness)
-
-    comms.add_portrait('spacewoman01',
-                       'images/comms woman.png',
-                       'images/comms woman 2.png',
-                       (335, 150),
-                       alpha=0)
-    comms_in_button = TransparentButton(None,
-                                     20,
-                                     20,
-                                     (830, 830),
-                                     0,
-                                     spacewoman_comms_routine,
-                                     None,
-                                     (255, 255, 255, 0),
-                                     (255, 255, 255, 0),
-                                     (255, 255, 255, 0))
-
-    comms_out_button = TransparentButton(None,
-                                         30,
-                                         35,
-                                         (775, 790),
-                                         0,
-                                         landing_comms_routine,
-                                         None,
-                                         (255, 255, 255, 0),
-                                         (255, 255, 255, 0),
-                                         (255, 255, 255, 0))
 
     pygame.mixer.music.load("./music/Lofi Beat 2.wav")
     pygame.mixer.music.set_volume(0.50)
@@ -136,17 +91,83 @@ async def main():
                                 position=(207, 209),
                                 game_state_manager=game_state_manager,
                                 comms_instance=comms)
+    stationchief01 = StationChief01(dialogue=StationChief01.dialogue,
+                                    position=(207, 209),
+                                    game_state_manager=game_state_manager,
+                                    comms_instance=comms,
+                                    cockpit_instance=cockpit)
 
-    mouse_event_handler = MouseEventHandler(
-        clickable_objects=[comms_in_button],
-        interactive_objects=[spacewoman01],
-        dropdown_menus=None)
+    comms.add_portrait('spacewoman01',
+                       'images/comms woman.png',
+                       'images/comms woman 2.png',
+                       (335, 150),
+                       alpha=0)
+    comms.add_portrait('stationchief01',
+                       'images/robit01.png',
+                       'images/robit02.png',
+                       (335, 150),
+                       alpha=0)
+
 
     # avoid fat planets disappearing before fully off-screen
     planetoid_padding = 30
 
     # gamestate is not cutscene
     game_state_manager.in_gameplay = True
+
+    def spacewoman_comms_routine():
+        if not comms.is_fully_visible('spacewoman01'):
+            comms.toggle_visibility('spacewoman01')
+        else:
+            spacewoman01.dialogue_index += 1
+        if spacewoman01.dialogue_index == len(spacewoman01.dialogue):
+            comms.toggle_visibility('spacewoman01')
+            cockpit.instruments[11]['glow'] = False
+            # direct to space station now
+            game_state_manager.navpoint_001_active = True
+
+    def landing_routine_check001():
+        space_station_01 = next((p for p in planetoids if p.object_id == "space_station_01"), None)
+        if space_station_01 and space_station_01.comms_distance and game_state_manager.navpoint_001_active:
+            cockpit.instruments[12]['glow'] = True
+
+
+
+    # FOR DEBUG
+    # space_station_01.comms_distance = True
+    # game_state_manager.navpoint_001_active = True
+    def draw_cross(surface, position, size=10, color=(255, 0, 0), thickness=2):
+        x, y = position
+        pygame.draw.line(surface, color, (x - size, y), (x + size, y), thickness)
+        pygame.draw.line(surface, color, (x, y - size), (x, y + size), thickness)
+
+    comms_in_button = TransparentButton(None,
+                                        20,
+                                        20,
+                                        (830, 830),
+                                        0,
+                                        spacewoman_comms_routine,
+                                        None,
+                                        (255, 255, 255, 0),
+                                        (255, 255, 255, 0),
+                                        (255, 255, 255, 0))
+
+    comms_out_button = TransparentButton(None,
+                                         30,
+                                         35,
+                                         (775, 790),
+                                         0,
+                                         lambda: stationchief01.handle_click(mouse_pos, button),
+                                         None,
+                                         (255, 255, 255, 0),
+                                         (255, 255, 255, 0),
+                                         (255, 255, 255, 0))
+    stationchief01.comms_out_button = comms_out_button
+
+    mouse_event_handler = MouseEventHandler(
+        clickable_objects=[comms_in_button, comms_out_button],
+        interactive_objects=[spacewoman01, stationchief01],
+        dropdown_menus=None)
 
     run = True
 
@@ -233,15 +254,15 @@ async def main():
 
             # Update stick image based on key press
             if keys[pygame.K_w]:
-                current_stick_img = stick_forward_img
+                cockpit.switch_image('stick_forward')
             elif keys[pygame.K_s]:
-                current_stick_img = stick_back_img
+                cockpit.switch_image('stick_back')
             elif keys[pygame.K_a]:
-                current_stick_img = stick_left_img
+                cockpit.switch_image('steering_left')
             elif keys[pygame.K_d]:
-                current_stick_img = stick_right_img
+                cockpit.switch_image('steering_right')
             else:
-                current_stick_img = cockpit
+                cockpit.switch_image('default')
 
             # Throttle/ scaling speed
             if keys[pygame.K_UP]:  # Speed up
@@ -293,18 +314,20 @@ async def main():
             speedometer.update(ship.speed)
             speedometer.draw(screen)
             radar.draw(screen, planetoids, ship.position, game_state_manager.navpoint_001_active)
-            current_stick_img.draw()
+            cockpit.draw()
 
             comms_in_button.draw(screen)
             comms.update_portraits()  # updates fade effect
             comms.draw()
 
             comms_out_button.draw(screen)
-            landing_comms_routine()
+            landing_routine_check001()
 
             # Comms dialogue draw
             if comms.is_fully_visible('spacewoman01'):
                 spacewoman01.show_current_dialogue(screen, comms)
+            if comms.is_fully_visible('stationchief01'):
+                stationchief01.show_current_dialogue(screen)
 
         elif game_state_manager.in_landing_scene:
             landing_scene = LandingScene(screen)
@@ -316,6 +339,7 @@ async def main():
         await asyncio.sleep(0)
 
         # Control the frame update rate for asyncio compatibility
+
         # Debug
         # velocity_text = f"Velocity: {ship.speed:.2f}"
         # velocity_surface = font.render(velocity_text, True, pygame.Color('white'))
@@ -323,6 +347,8 @@ async def main():
         # angle_text = f"Angle: {ship.angle}"
         # angle_surface = font.render(angle_text, True, pygame.Color('white'))
         # screen.blit(angle_surface, (20, 40))  # Position the text on the top-left corner
+
         # Switch to cutscene trigger
+
 
 asyncio.run(main())
