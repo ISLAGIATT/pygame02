@@ -48,7 +48,7 @@ class LandingScene:
         self.zoom_out_rate = 0.99  # Adjust the rate as needed
         self.zoom_out = False
 
-        pygame.mixer.music.load("./music/Ancient-Game-Menu.mp3")
+        pygame.mixer.music.load("./music/Ancient-Game-Menu.ogg")
         pygame.mixer.music.set_volume(0.50)
         pygame.mixer.music.play(loops=-1)
 

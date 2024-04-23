@@ -1,6 +1,6 @@
-# TODO: fade transition between gameplay states
 # TODO: navcross invisible if  behind player
 # TODO: verbal signposting based on time elapsed
+# TODO: debug two portraits onscreen at once
 # TODO: (big) bar scene
 
 import asyncio
@@ -31,7 +31,6 @@ async def main():
     GREY = (32, 32, 32)
 
     pygame.init()
-
     SCREEN_WIDTH = 1024
     SCREEN_HEIGHT = 1024
     screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
@@ -56,7 +55,7 @@ async def main():
     stars = [Star(SCREEN_WIDTH, SCREEN_HEIGHT) for _ in range(NUM_STARS)]
     comets = []
 
-    # Planetoid objects: intial scale = distance away
+    # Planetoid objects: initial scale = distance away
     planetoids = pygame.sprite.LayeredUpdates()
     planetoid_01 = Planetoid('images/green_planet01.png',
                              (600, 300),
@@ -84,14 +83,21 @@ async def main():
     planetoids.add(planetoid_01, layer=1)
     planetoids.add(space_station_01, layer=2)
 
-    #onscreen nav point marker
+    # avoid fat planets disappearing before fully off-screen
+    planetoid_padding = 30
 
-    pygame.mixer.music.load("./music/Lofi Beat 2.wav")
+    # Fade management
+    fade_surface = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT))
+    fade_surface.fill((0, 0, 0))
+    fade_alpha = 0
+    fade_surface.set_alpha(fade_alpha)
+
+    # music
+    pygame.mixer.music.load("./music/Lofi Beat 2.ogg")
     pygame.mixer.music.set_volume(0.50)
     pygame.mixer.music.play(loops=-1)
 
     # Characters
-
     spacewoman01 = SpaceWoman01(dialogue=SpaceWoman01.dialogue,
                                 position=(207, 209),
                                 game_state_manager=game_state_manager,
@@ -112,12 +118,6 @@ async def main():
                        'images/robit02.png',
                        (335, 150),
                        alpha=0)
-
-    # avoid fat planets disappearing before fully off-screen
-    planetoid_padding = 30
-
-    # gamestate is not cutscene
-    game_state_manager.in_gameplay = True
 
     # initialize mouse pos for buttons
     mouse_pos = (-1, -1)
@@ -142,12 +142,9 @@ async def main():
 
     def begin_landing(mouse_pos):
         if game_state_manager.good_to_land and landing_button.is_over(mouse_pos):
-            game_state_manager.switch_to_landing_scene()
+            game_state_manager.is_fading = True  # Start fading
 
-    # FOR DEBUG
-    # space_station_01.comms_distance = True
-    # game_state_manager.navpoint_001_active = True
-    # game_state_manager.good_to_land = True
+    # onscreen nav point marker
     def draw_cross(surface, position, size=10, color=(255, 0, 0), thickness=2):
         x, y = position
         pygame.draw.line(surface, color, (x - size, y), (x + size, y), thickness)
@@ -190,6 +187,14 @@ async def main():
         clickable_objects=[comms_in_button, comms_out_button, landing_button],
         interactive_objects=[spacewoman01, stationchief01],
         dropdown_menus=None)
+
+    # gamestate is not cutscene
+    game_state_manager.in_gameplay = True
+
+    # FOR DEBUG
+    # space_station_01.comms_distance = True
+    # game_state_manager.navpoint_001_active = True
+    # game_state_manager.good_to_land = True
 
     run = True
 
@@ -352,6 +357,18 @@ async def main():
             if comms.is_fully_visible('stationchief01'):
                 stationchief01.show_current_dialogue(screen)
 
+            # transition to landing scene
+            if game_state_manager.is_fading:
+                if game_state_manager.fade_alpha < 255:
+                    game_state_manager.fade_alpha += game_state_manager.fade_rate
+                    fade_surface.set_alpha(game_state_manager.fade_alpha)
+                    screen.blit(fade_surface, (0, 0))
+                else:
+                    game_state_manager.switch_to_landing_scene()
+                    game_state_manager.fade_alpha = 0 # reset
+                    game_state_manager.is_fading = False  # stop fading process
+                    continue # break loop to avoid cockpit frame weirdness
+
         elif game_state_manager.in_landing_scene:
             landing_scene = LandingScene(screen)
             landing_scene.run_scene()
@@ -361,8 +378,6 @@ async def main():
 
         await asyncio.sleep(0)
 
-        # Control the frame update rate for asyncio compatibility
-
         # Debug
         # velocity_text = f"Velocity: {ship.speed:.2f}"
         # velocity_surface = font.render(velocity_text, True, pygame.Color('white'))
@@ -370,8 +385,6 @@ async def main():
         # angle_text = f"Angle: {ship.angle}"
         # angle_surface = font.render(angle_text, True, pygame.Color('white'))
         # screen.blit(angle_surface, (20, 40))  # Position the text on the top-left corner
-
-        # Switch to cutscene trigger
 
 
 asyncio.run(main())

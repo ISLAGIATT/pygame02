@@ -2,6 +2,9 @@ class GameStateManager:
     def __init__(self):
         self.current_room_id = None
         self.current_open_dropdown = None
+        self.fade_alpha = 0
+        self.fade_rate = 4
+        self.is_fading = False
         self.target_alpha_reached = False
         self.navpoint_001_active = False
         self.good_to_land = False

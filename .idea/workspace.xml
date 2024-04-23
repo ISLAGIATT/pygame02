@@ -4,9 +4,8 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="05f7812f-ee3c-44ef-964e-18c07ae7c61f" name="Changes" comment="mouse handling for station chief good&#10;need to make a landing button">
+    <list default="true" id="05f7812f-ee3c-44ef-964e-18c07ae7c61f" name="Changes" comment="gameplay arc is functional">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/cockpit.py" beforeDir="false" afterPath="$PROJECT_DIR$/cockpit.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/game_state_manager.py" beforeDir="false" afterPath="$PROJECT_DIR$/game_state_manager.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
     </list>
@@ -265,7 +264,15 @@
       <option name="project" value="LOCAL" />
       <updated>1713815314430</updated>
     </task>
-    <option name="localTasksCounter" value="14" />
+    <task id="LOCAL-00014" summary="gameplay arc is functional">
+      <option name="closed" value="true" />
+      <created>1713887785177</created>
+      <option name="number" value="00014" />
+      <option name="presentableId" value="LOCAL-00014" />
+      <option name="project" value="LOCAL" />
+      <updated>1713887785177</updated>
+    </task>
+    <option name="localTasksCounter" value="15" />
     <servers />
   </component>
   <component name="VcsManagerConfiguration">
@@ -282,6 +289,7 @@
     <MESSAGE value="landing scene converted to class" />
     <MESSAGE value="comms distance check&#10;comms out button&#10;scale clamp for planetoid class" />
     <MESSAGE value="mouse handling for station chief good&#10;need to make a landing button" />
-    <option name="LAST_COMMIT_MESSAGE" value="mouse handling for station chief good&#10;need to make a landing button" />
+    <MESSAGE value="gameplay arc is functional" />
+    <option name="LAST_COMMIT_MESSAGE" value="gameplay arc is functional" />
   </component>
 </project>
