@@ -4,6 +4,7 @@ class GameStateManager:
         self.current_open_dropdown = None
         self.target_alpha_reached = False
         self.navpoint_001_active = False
+        self.good_to_land = False
         self.in_gameplay = True
         self.in_landing_scene = False
         self.rooms = {

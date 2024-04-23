@@ -1,3 +1,8 @@
+# TODO: fade transition between gameplay states
+# TODO: navcross invisible if  behind player
+# TODO: verbal signposting based on time elapsed
+# TODO: (big) bar scene
+
 import asyncio
 import pygame
 import pygame.sprite
@@ -72,12 +77,12 @@ async def main():
                         "star_01",
                         initial_scale=.2,
                         scaling_rate=0,
-                        orbit_speed=.25)
+                        orbit_speed=.25,
+                        show_on_radar=False)
     # Add sprites with a specific layer
     planetoids.add(star_01, layer=0)  # Ensure star_01 is on the bottom layer
     planetoids.add(planetoid_01, layer=1)
     planetoids.add(space_station_01, layer=2)
-
 
     #onscreen nav point marker
 
@@ -108,12 +113,14 @@ async def main():
                        (335, 150),
                        alpha=0)
 
-
     # avoid fat planets disappearing before fully off-screen
     planetoid_padding = 30
 
     # gamestate is not cutscene
     game_state_manager.in_gameplay = True
+
+    # initialize mouse pos for buttons
+    mouse_pos = (-1, -1)
 
     def spacewoman_comms_routine():
         if not comms.is_fully_visible('spacewoman01'):
@@ -130,12 +137,17 @@ async def main():
         space_station_01 = next((p for p in planetoids if p.object_id == "space_station_01"), None)
         if space_station_01 and space_station_01.comms_distance and game_state_manager.navpoint_001_active:
             cockpit.instruments[12]['glow'] = True
+        if game_state_manager.good_to_land:
+            cockpit.instruments[13]['glow'] = True
 
-
+    def begin_landing(mouse_pos):
+        if game_state_manager.good_to_land and landing_button.is_over(mouse_pos):
+            game_state_manager.switch_to_landing_scene()
 
     # FOR DEBUG
     # space_station_01.comms_distance = True
     # game_state_manager.navpoint_001_active = True
+    # game_state_manager.good_to_land = True
     def draw_cross(surface, position, size=10, color=(255, 0, 0), thickness=2):
         x, y = position
         pygame.draw.line(surface, color, (x - size, y), (x + size, y), thickness)
@@ -162,10 +174,20 @@ async def main():
                                          (255, 255, 255, 0),
                                          (255, 255, 255, 0),
                                          (255, 255, 255, 0))
+    landing_button = TransparentButton(None,
+                                       40,
+                                       40,
+                                       (550, 822),
+                                       0,
+                                       lambda: begin_landing(mouse_pos),
+                                       None,
+                                       (255, 255, 255, 0),
+                                       (255, 255, 255, 0),
+                                       (255, 255, 255, 0),)
     stationchief01.comms_out_button = comms_out_button
 
     mouse_event_handler = MouseEventHandler(
-        clickable_objects=[comms_in_button, comms_out_button],
+        clickable_objects=[comms_in_button, comms_out_button, landing_button],
         interactive_objects=[spacewoman01, stationchief01],
         dropdown_menus=None)
 
@@ -177,7 +199,7 @@ async def main():
             dt = clock.tick(60) / 1000.0
             keys = pygame.key.get_pressed()
 
-            # temporary cutscene trigger
+            # temporary cutscene trigger for debug
             if keys[pygame.K_SPACE]:  # change to condition for cutscene
                 game_state_manager.switch_to_landing_scene()
 
@@ -196,7 +218,7 @@ async def main():
             # Update ship's orientation for star movement
             ship.angle += ship_yaw_change  # Assuming ship.angle incorporates both yaw and pitch
 
-            # Relative location of space objects/illusion of movement
+            # Relative location of space objects/illusion of movement in three dimensions (hell yeah)
             for planetoid in planetoids:
                 modified_orbit_speed = planetoid.orbit_speed * yoke_pull
                 if keys[pygame.K_w]:
@@ -252,7 +274,8 @@ async def main():
                                                SCREEN_HEIGHT / 2)  # screen center data for quadratic scaling MATHHHHASJKFHASKLJFASKJFBN
                 planetoids.update(dt, ship_yaw_change, ship_pitch_change, ship.speed, SCREEN_CENTER)
 
-            # Update stick image based on key press
+            # Update stick image based on key press.
+            # Changed to dictionary with images initialized in cockpit class to avoid button light weirdness
             if keys[pygame.K_w]:
                 cockpit.switch_image('stick_forward')
             elif keys[pygame.K_s]:
@@ -319,8 +342,8 @@ async def main():
             comms_in_button.draw(screen)
             comms.update_portraits()  # updates fade effect
             comms.draw()
-
             comms_out_button.draw(screen)
+            landing_button.draw(screen)
             landing_routine_check001()
 
             # Comms dialogue draw
