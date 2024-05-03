@@ -1,3 +1,4 @@
+import asyncio
 import pygame
 import pygame.sprite
 import random
@@ -10,6 +11,7 @@ from stars import Star, Comet, Planetoid
 mouse_event_handler = MouseEventHandler
 game_state_manager = GameStateManager
 class LandingScene:
+
     def __init__(self, screen):
         self.screen = screen
         self.clock = pygame.time.Clock()
@@ -158,9 +160,10 @@ class LandingScene:
                 if event.key == pygame.K_SPACE:
                     print("Spacebar pressed!")  # Example action
 
-    def run_scene(self):
+    async def run_scene(self):
         while self.run:
             dt = self.clock.tick(60) / 1000.0
             self.handle_events()
             self.update(dt)
             self.render()
+            await asyncio.sleep(0)

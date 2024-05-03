@@ -1,6 +1,7 @@
 # TODO: navcross invisible if  behind player
 # TODO: verbal signposting based on time elapsed
 # TODO: debug two portraits onscreen at once
+# TODO: way to break out of landing scene
 # TODO: (big) bar scene
 
 import asyncio
@@ -139,6 +140,7 @@ async def main():
             cockpit.instruments[12]['glow'] = True
         if game_state_manager.good_to_land:
             cockpit.instruments[13]['glow'] = True
+            cockpit.instruments[12]['glow'] = False
 
     def begin_landing(mouse_pos):
         if game_state_manager.good_to_land and landing_button.is_over(mouse_pos):
@@ -343,7 +345,6 @@ async def main():
             speedometer.draw(screen)
             radar.draw(screen, planetoids, ship.position, game_state_manager.navpoint_001_active)
             cockpit.draw()
-
             comms_in_button.draw(screen)
             comms.update_portraits()  # updates fade effect
             comms.draw()
@@ -371,11 +372,11 @@ async def main():
 
         elif game_state_manager.in_landing_scene:
             landing_scene = LandingScene(screen)
-            landing_scene.run_scene()
+            await landing_scene.run_scene()
             game_state_manager.switch_to_gameplay()
 
+        clock.tick(60)
         pygame.display.flip()
-
         await asyncio.sleep(0)
 
         # Debug
@@ -385,6 +386,5 @@ async def main():
         # angle_text = f"Angle: {ship.angle}"
         # angle_surface = font.render(angle_text, True, pygame.Color('white'))
         # screen.blit(angle_surface, (20, 40))  # Position the text on the top-left corner
-
 
 asyncio.run(main())
